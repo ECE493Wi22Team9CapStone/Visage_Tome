@@ -35,6 +35,7 @@ if SECRET_KEY is None:
 DEBUG = os.getenv('DEBUG', 'True')
 
 ALLOWED_HOSTS = [
+    'visage-tome-api.herokuapp.com',
     '.herokuapp.com',
     'localhost',
     '127.0.0.1',
