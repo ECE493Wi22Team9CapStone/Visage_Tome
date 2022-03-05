@@ -1,0 +1,4 @@
+### for backend ###
+backend/venv/
+**/__pycache__/
+db.sqlite3
