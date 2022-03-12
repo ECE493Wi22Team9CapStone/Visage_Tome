@@ -8,8 +8,8 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     date_posted = models.DateTimeField(auto_now_add=True)
+    tags = models.CharField(max_length=200, default="")
     #TODO: media field (Photo/Video)
-    #TODO: tags
 
     def __str__(self):
         return "(" + self.display_name + ") " + self.title
