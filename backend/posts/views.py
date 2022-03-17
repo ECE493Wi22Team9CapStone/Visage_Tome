@@ -1,4 +1,4 @@
-from .models import Post
+from .models import Post, Image
 from .serializers import PostSerializer
 
 from rest_framework.views import APIView
@@ -24,7 +24,19 @@ class PostDetailView(APIView):
     serializer_class = PostSerializer
 
     def get(self, request, post_id):
-        pass
+        """
+        ## Description:
+        Get the post with the id post_id
+        ## Responses:
+        **200**: for successful GET request, the post JSON is returned <br>
+        **404**: if the post_id does not exist
+        """
+        try:
+            post = Post.objects.get(id=post_id)
+            serializer = PostSerializer(post)
+            return Response(serializer.data)
+        except Post.DoesNotExist:
+            return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, post_id):
         """
@@ -39,9 +51,13 @@ class PostDetailView(APIView):
             post = Post.objects.get(id=post_id)
             return Response("Post id already exist", status=status.HTTP_409_CONFLICT)
         except Post.DoesNotExist:
+            if "images" not in request.data:
+                return Response("Post does not include 'images' field", status=status.HTTP_400_BAD_REQUEST)
             serializer = PostSerializer(data=request.data)
             if serializer.is_valid():
-                serializer.save()
+                post = serializer.save()
+                for image in request.data.getlist("images"):
+                    Image.objects.create(post=post, image=image)
                 return Response(serializer.data)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

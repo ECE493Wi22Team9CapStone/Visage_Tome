@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 
@@ -13,6 +14,7 @@ import ImageListItem from '@mui/material/ImageListItem';
 
 import H1 from 'components/H1';
 import messages from './messages';
+import { BACKEND_URL } from '../../utils/constants';
 
 const Input = styled('input')({
 	display: 'none',
@@ -22,6 +24,10 @@ class CreatePostPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      displayName: "",
+      postTitle: "",
+      postDescription: "",
+      tags: "",
       images: []
     }
 
@@ -49,6 +55,31 @@ class CreatePostPage extends React.Component {
     });
   }
   
+  onCreateClick = () => {
+    let formData = new FormData();
+    formData.append('display_name', this.state.displayName);
+    formData.append('title', this.state.postTitle);
+    formData.append('description', this.state.postDescription);
+    formData.append('tags', this.state.tags.join(','));
+    for (let i = 0; i < this.state.images.length; i++) {
+      formData.append('images', this.state.images[i]);
+    }
+
+    let backendUrl = `${BACKEND_URL}/posts/`;
+
+    axios.post(backendUrl, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    })
+    .then(res => {
+      console.log(res);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  }
+
 	render() {
     return (
       <div>
@@ -73,6 +104,8 @@ class CreatePostPage extends React.Component {
             type="text"
             label="Display Name"
             variant="outlined"
+            value={this.state.displayName}
+            onChange={(event) => this.setState({displayName: event.target.value})}
           />
           
           <TextField
@@ -80,6 +113,8 @@ class CreatePostPage extends React.Component {
             type="text"
             label="Post Title"
             variant="outlined"
+            value={this.state.postTitle}
+            onChange={(event) => this.setState({postTitle: event.target.value})}
           />
 
           <TextField
@@ -89,12 +124,14 @@ class CreatePostPage extends React.Component {
             label="Post Description"
             variant="outlined"
             rows={4}
+            value={this.state.postDescription}
+            onChange={(event) => this.setState({postDescription: event.target.value})}
           />
           
           <ImageList cols={4}>
             {this.state.images.map((item) => (
               <ImageListItem 
-                key={item}
+                key={item + Math.random()}
                 onClick={() => this.onImageRemove(item)}
               >
                 <img
@@ -109,7 +146,7 @@ class CreatePostPage extends React.Component {
             variant="contained"
             component="label"
           >
-            Upload File
+            <FormattedMessage {...messages.upload} />
             <input
               type="file"
               accept="image/*"
@@ -137,6 +174,7 @@ class CreatePostPage extends React.Component {
               placeholder="Add some tags to your image"
             />
             )}
+            onChange={(event, value) => this.setState({tags: value})}
           />
 
           <Stack 
@@ -148,10 +186,10 @@ class CreatePostPage extends React.Component {
             direction={"row"} 
             spacing={5}
           >
-            <Button variant='contained' color='error'>
+            <Button variant='contained' color='error' href='/'>
               <FormattedMessage {...messages.cancel} />
             </Button>
-            <Button variant='contained' color='success'>
+            <Button variant='contained' color='success' onClick={this.onCreateClick}>
               <FormattedMessage {...messages.create} />
             </Button>
           </Stack>

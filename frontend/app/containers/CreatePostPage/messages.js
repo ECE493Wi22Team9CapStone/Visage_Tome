@@ -14,5 +14,9 @@ export default defineMessages({
     create: {
       id: `${scope}.create`,
       defaultMessage: 'Create',
+    },
+    upload: {
+      id: `${scope}.upload`,
+      defaultMessage: 'Upload Image(s)',
     }
 });

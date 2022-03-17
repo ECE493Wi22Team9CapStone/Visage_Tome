@@ -12,4 +12,8 @@ class Post(models.Model):
     #TODO: media field (Photo/Video)
 
     def __str__(self):
-        return "(" + self.display_name + ") " + self.title
+        return "(" + self.id + ") " + self.title
+
+class Image(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_images")
+    image = models.ImageField(upload_to='images/')
