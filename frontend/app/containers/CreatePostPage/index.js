@@ -15,6 +15,7 @@ import ImageListItem from '@mui/material/ImageListItem';
 import H1 from 'components/H1';
 import messages from './messages';
 import { BACKEND_URL } from '../../utils/constants';
+import { Redirect } from 'react-router-dom';
 
 const Input = styled('input')({
 	display: 'none',
@@ -28,7 +29,8 @@ class CreatePostPage extends React.Component {
       postTitle: "",
       postDescription: "",
       tags: "",
-      images: []
+      images: [],
+      isCreated: false,
     }
 
     this.onImageUpload = this.onImageUpload.bind(this);
@@ -43,7 +45,6 @@ class CreatePostPage extends React.Component {
   });
 
   onImageUpload = (event) => {
-    console.log("here");
     this.setState({
       images: [...this.state.images, ...event.target.files]
     });
@@ -73,7 +74,11 @@ class CreatePostPage extends React.Component {
       }
     })
     .then(res => {
-      console.log(res);
+      if (res.status === 200) {
+        this.setState({
+          isCreated: true
+        });
+      }
     })
     .catch(err => {
       console.log(err);
@@ -81,121 +86,129 @@ class CreatePostPage extends React.Component {
   }
 
 	render() {
-    return (
-      <div>
-        <Helmet>
-          <title>Create Post Page</title>
-        </Helmet>
-        <H1>
-          <FormattedMessage {...messages.header} />
-        </H1>
-        
-        <Stack
-          component="form"
-          sx={{
-          width: '100%'
-          }}
-          spacing={2}
-          noValidate
-          autoComplete="off"
-        >
-          <TextField
-            id="display-name"
-            type="text"
-            label="Display Name"
-            variant="outlined"
-            value={this.state.displayName}
-            onChange={(event) => this.setState({displayName: event.target.value})}
-          />
+    if (this.state.isCreated) {
+      return <Redirect to={{
+        pathname: '/',
+        state: { from: '/create', status: 'success' }
+      }} />  
+    }
+    else {
+      return (
+        <div>
+          <Helmet>
+            <title>Create Post Page</title>
+          </Helmet>
+          <H1>
+            <FormattedMessage {...messages.header} />
+          </H1>
           
-          <TextField
-            id="post-title"
-            type="text"
-            label="Post Title"
-            variant="outlined"
-            value={this.state.postTitle}
-            onChange={(event) => this.setState({postTitle: event.target.value})}
-          />
-
-          <TextField
-            multiline
-            id="post-description"
-            type="text"
-            label="Post Description"
-            variant="outlined"
-            rows={4}
-            value={this.state.postDescription}
-            onChange={(event) => this.setState({postDescription: event.target.value})}
-          />
-          
-          <ImageList cols={4}>
-            {this.state.images.map((item) => (
-              <ImageListItem 
-                key={item + Math.random()}
-                onClick={() => this.onImageRemove(item)}
-              >
-                <img
-                  src={`${URL.createObjectURL(item)}`}
-                  loading="lazy"
-                />
-              </ImageListItem>
-            ))}
-          </ImageList>
-
-          <Button
-            variant="contained"
-            component="label"
-          >
-            <FormattedMessage {...messages.upload} />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={this.onImageUpload}
-              hidden
-            />
-          </Button>
-
-          <Autocomplete
-            multiple
-            freeSolo
-            options={[]}
-            noOptionsText="Press Enter to add"
-            id="post-tags"
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-              <Chip color="primary" label={option} {...getTagProps({ index })} />
-              ))
-            }
-            renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="outlined"
-              label="Tags"
-              placeholder="Add some tags to your image"
-            />
-            )}
-            onChange={(event, value) => this.setState({tags: value})}
-          />
-
-          <Stack 
+          <Stack
+            component="form"
             sx={{
-              'position': 'relative',
-              'alignItems': 'center',
-              'justifyContent': 'center',
-            }} 
-            direction={"row"} 
-            spacing={5}
+            width: '100%'
+            }}
+            spacing={2}
+            noValidate
+            autoComplete="off"
           >
-            <Button variant='contained' color='error' href='/'>
-              <FormattedMessage {...messages.cancel} />
+            <TextField
+              id="display-name"
+              type="text"
+              label="Display Name"
+              variant="outlined"
+              value={this.state.displayName}
+              onChange={(event) => this.setState({displayName: event.target.value})}
+            />
+            
+            <TextField
+              id="post-title"
+              type="text"
+              label="Post Title"
+              variant="outlined"
+              value={this.state.postTitle}
+              onChange={(event) => this.setState({postTitle: event.target.value})}
+            />
+
+            <TextField
+              multiline
+              id="post-description"
+              type="text"
+              label="Post Description"
+              variant="outlined"
+              rows={4}
+              value={this.state.postDescription}
+              onChange={(event) => this.setState({postDescription: event.target.value})}
+            />
+            
+            <ImageList cols={4}>
+              {this.state.images.map((item) => (
+                <ImageListItem 
+                  key={item + Math.random()}
+                  onClick={() => this.onImageRemove(item)}
+                >
+                  <img
+                    src={`${URL.createObjectURL(item)}`}
+                    loading="lazy"
+                  />
+                </ImageListItem>
+              ))}
+            </ImageList>
+
+            <Button
+              variant="contained"
+              component="label"
+            >
+              <FormattedMessage {...messages.upload} />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={this.onImageUpload}
+                hidden
+              />
             </Button>
-            <Button variant='contained' color='success' onClick={this.onCreateClick}>
-              <FormattedMessage {...messages.create} />
-            </Button>
+
+            <Autocomplete
+              multiple
+              freeSolo
+              options={[]}
+              noOptionsText="Press Enter to add"
+              id="post-tags"
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                <Chip color="primary" label={option} {...getTagProps({ index })} />
+                ))
+              }
+              renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Tags"
+                placeholder="Add some tags to your image"
+              />
+              )}
+              onChange={(event, value) => this.setState({tags: value})}
+            />
+
+            <Stack 
+              sx={{
+                'position': 'relative',
+                'alignItems': 'center',
+                'justifyContent': 'center',
+              }} 
+              direction={"row"} 
+              spacing={5}
+            >
+              <Button variant='contained' color='error' href='/'>
+                <FormattedMessage {...messages.cancel} />
+              </Button>
+              <Button variant='contained' color='success' onClick={this.onCreateClick}>
+                <FormattedMessage {...messages.create} />
+              </Button>
+            </Stack>
           </Stack>
-        </Stack>
-      </div>
-    );
+        </div>
+      );
+    }
 	}
 }
 
