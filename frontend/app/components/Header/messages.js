@@ -5,7 +5,7 @@
  */
 import { defineMessages } from 'react-intl';
 
-export const scope = 'boilerplate.components.Header';
+export const scope = 'VisageTome.components.Header';
 
 export default defineMessages({
   home: {
@@ -16,4 +16,8 @@ export default defineMessages({
     id: `${scope}.features`,
     defaultMessage: 'Features',
   },
+  create: {
+    id: `${scope}.create`,
+    defaultMessage: 'Create',
+  }
 });
