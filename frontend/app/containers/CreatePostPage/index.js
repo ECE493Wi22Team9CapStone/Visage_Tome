@@ -35,6 +35,7 @@ class CreatePostPage extends React.Component {
 
     this.onImageUpload = this.onImageUpload.bind(this);
     this.onImageRemove = this.onImageRemove.bind(this);
+    this.onCreateClick = this.onCreateClick.bind(this);
   }
 
   toBase64 = (file) => new Promise((resolve, reject) => {
@@ -140,10 +141,10 @@ class CreatePostPage extends React.Component {
               onChange={(event) => this.setState({postDescription: event.target.value})}
             />
             
-            <ImageList cols={4}>
+            <ImageList variant="masonry" cols={3}>
               {this.state.images.map((item) => (
                 <ImageListItem 
-                  key={item + Math.random()}
+                  key={item.name}
                   onClick={() => this.onImageRemove(item)}
                 >
                   <img
