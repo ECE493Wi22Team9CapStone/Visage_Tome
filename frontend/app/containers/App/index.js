@@ -45,6 +45,7 @@ export default function App() {
         <Route path="/create" component={CreatePostPage} />
         <Route path="" component={NotFoundPage} />
       </Switch>
+      <Footer />
       <GlobalStyle />
     </AppWrapper>
   );
