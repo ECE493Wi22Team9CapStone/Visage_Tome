@@ -4,6 +4,8 @@ from .models import Post, Image
 from .serializers import PostSerializer
 from .pagination import PostPagination
 
+from django.utils import timezone
+
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
@@ -16,7 +18,7 @@ class PostListView(ListCreateAPIView):
     pagination_class = PostPagination
 
     def get_queryset(self):
-        return Post.objects.all()
+        return Post.objects.filter(date_expiry__gt=timezone.now()).order_by('-date_posted')
 
     def get(self, request, *args, **kwargs):
         """
