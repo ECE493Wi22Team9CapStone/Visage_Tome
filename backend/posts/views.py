@@ -1,6 +1,10 @@
+from datetime import timedelta
+from visage_tome.models import EditableSetting
 from .models import Post, Image
 from .serializers import PostSerializer
 from .pagination import PostPagination
+
+from django.utils import timezone
 
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, ListCreateAPIView
@@ -14,7 +18,7 @@ class PostListView(ListCreateAPIView):
     pagination_class = PostPagination
 
     def get_queryset(self):
-        return Post.objects.all()
+        return Post.objects.filter(date_expiry__gt=timezone.now()).order_by('-date_posted')
 
     def get(self, request, *args, **kwargs):
         """
@@ -67,6 +71,14 @@ class PostDetailView(APIView):
                 post = serializer.save()
                 for image in request.data.getlist("images"):
                     Image.objects.create(post=post, image=image)
+                settings = EditableSetting.load()
+                try:
+                    # TODO: add condition for registered user
+                    post.date_expiry = post.date_posted + timedelta(days=settings.guest_post_lifespan)
+                except EditableSetting.DoesNotExist:
+                    post.date_expiry = post.date_posted + timedelta(days=7)
+                post.save()
+
                 return Response(serializer.data)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
