@@ -38,13 +38,6 @@ class CreatePostPage extends React.Component {
     this.onCreateClick = this.onCreateClick.bind(this);
   }
 
-  toBase64 = (file) => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-  });
-
   onImageUpload = (event) => {
     this.setState({
       images: [...this.state.images, ...event.target.files]
