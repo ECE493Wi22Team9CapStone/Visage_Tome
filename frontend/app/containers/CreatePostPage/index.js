@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 
-import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
@@ -16,10 +15,6 @@ import H1 from 'components/H1';
 import messages from './messages';
 import { BACKEND_URL } from '../../utils/constants';
 import { Redirect } from 'react-router-dom';
-
-const Input = styled('input')({
-	display: 'none',
-});
 
 class CreatePostPage extends React.Component {
   constructor(props) {
@@ -125,11 +120,11 @@ class CreatePostPage extends React.Component {
 
             <TextField
               multiline
+              fullWidth
               id="post-description"
               type="text"
               label="Post Description"
               variant="outlined"
-              rows={4}
               value={this.state.postDescription}
               onChange={(event) => this.setState({postDescription: event.target.value})}
             />

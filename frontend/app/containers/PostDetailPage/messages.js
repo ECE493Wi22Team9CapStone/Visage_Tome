@@ -3,8 +3,16 @@ import { defineMessages } from 'react-intl';
 export const scope = 'VisageTome.containers.PostDetailPage';
 
 export default defineMessages({
-    header: {
-      id: `${scope}.header`,
-      defaultMessage: 'Post Detail',
-    }
+  detail: {
+    id: `${scope}.detail`,
+    defaultMessage: 'Post Details',
+  },
+  images: {
+    id: `${scope}.images`,
+    defaultMessage: 'Post Images',
+  },
+  tags: {
+    id: `${scope}.tags`,
+    defaultMessage: 'Image Tags',
+  }
 });

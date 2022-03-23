@@ -10,8 +10,9 @@ import { Redirect } from 'react-router-dom';
 
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
-import { Pagination, PaginationItem } from '@mui/material';
-import { ImageListItemBar, Stack } from '@mui/material';
+import Pagination from '@mui/material/Pagination';
+import ImageListItemBar from '@mui/material/ImageListItemBar';
+import Stack from '@mui/material/Stack';
 
 import LoadingIndicator from 'components/LoadingIndicator';
 import axios from 'axios';
