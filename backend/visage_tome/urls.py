@@ -25,6 +25,9 @@ urlpatterns = [
     path('', SpectacularSwaggerView.as_view(
         url_name='open-schema'), name='api-root'),
 
+    # user
+    path('users/', include('users.urls')),
+
     # post app
     path('posts/', include('posts.urls')),
 
