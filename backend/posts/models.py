@@ -18,3 +18,15 @@ class Post(models.Model):
 class Image(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_images")
     image = models.ImageField(upload_to='')
+
+class Like(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_likes")
+    # TODO: uncomment
+    # user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="user_likes")
+    date = models.DateTimeField(auto_now_add=True)
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_comments")
+    username = models.CharField(max_length=100, default="Anonymous")
+    date = models.DateTimeField(auto_now_add=True)
+    content = models.TextField()
