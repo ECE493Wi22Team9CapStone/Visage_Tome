@@ -28,6 +28,9 @@ urlpatterns = [
     # post app
     path('posts/', include('posts.urls')),
 
+    # post app
+    path('users/', include('users.urls')),
+
     # admin
     path('admin/', admin.site.urls),
 
