@@ -12,9 +12,13 @@ import TextField from '@mui/material/TextField';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Grid from '@mui/material/Grid';
 import InputAdornment from '@mui/material/InputAdornment';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import CommentIcon from '@mui/icons-material/Comment';
+import SendIcon from '@mui/icons-material/Send';
+import FaceIcon from '@mui/icons-material/Face';
 
 // custom librairies and definitions
 import messages from './messages';
@@ -29,10 +33,12 @@ class PostDetailPage extends React.Component {
     this.state = {
       post: null,
       postId: props.location.pathname.split('/')[2],
-      liked: false
+      liked: false,
+      comment: ""
     }
-
+    
     this.onLikeButtonClick = this.onLikeButtonClick.bind(this);
+    this.onCommentSend = this.onCommentSend.bind(this);
   }
 
   onImageClick = (image) => {
@@ -40,9 +46,42 @@ class PostDetailPage extends React.Component {
   }
 
   onLikeButtonClick = () => {
-    this.setState({
-      liked: true
-    });
+    if (this.state.liked) {
+      return;
+    }
+    axios.post(`${BACKEND_URL}/posts/${this.state.postId}/like/`)
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            post: res.data,
+            liked: true
+          });
+        } else {
+          console.log("Failed to like post: ", res);
+        }
+      })
+      .catch(err => {
+        console.log("Failed to like post: ", err);
+      });
+  }
+
+  onCommentSend = () => {
+    axios.post(`${BACKEND_URL}/posts/${this.state.postId}/comment/`, {
+      content: this.state.comment
+    })
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            post: res.data,
+            comment: ""
+          });
+        } else {
+          console.log("Failed to comment post: ", res);
+        }
+      })
+      .catch(err => {
+        console.log("Failed to send comment: ", err);
+      });
   }
 
   componentDidMount() {
@@ -203,7 +242,7 @@ class PostDetailPage extends React.Component {
                   startAdornment: (
                     <InputAdornment position="start">
                       <ThumbUpIcon 
-                        color= {this.state.liked ? "success" : "primary"} 
+                        color= {this.state.liked ? "success" : "action"} 
                         fontSize="large"
                         onClick={() => { this.onLikeButtonClick() }}
                       />
@@ -211,7 +250,7 @@ class PostDetailPage extends React.Component {
                   ),
                   disableUnderline: true
                 }}
-                value={0}
+                value={this.state.post.likes}
               />
 
               <TextField 
@@ -232,9 +271,51 @@ class PostDetailPage extends React.Component {
                   ),
                   disableUnderline: true
                 }}
-                value={0}
+                value={this.state.post.comments.length}
               />
             </Stack>
+
+            <TextField 
+              id="add_comment" 
+              variant="outlined"
+              label="Add Comment"
+              placeholder="Add your comment here"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                      <SendIcon
+                        color="primary"
+                        onClick={() => { this.onCommentSend() }}
+                      />
+                  </InputAdornment>
+                )
+              }}
+              value={this.state.comment}
+              onChange={(event) => this.setState({comment: event.target.value})}
+            />
+
+            {/* https://codesandbox.io/s/comment-box-with-material-ui-10p3c */}
+            {this.state.post.comments.map((comment) => (
+              <Paper style={{ padding: "30px 20px" }} elavation={6}>
+                <Grid container wrap="nowrap" spacing={2}>
+                  <Grid item >
+                    <FaceIcon 
+                      color="primary"
+                      fontSize="large" 
+                    />
+                  </Grid>
+                  <Grid justifyContent="left" item xs zeroMinWidth>
+                    <h4 style={{ margin: 0, textAlign: "left" }}>{comment.username}</h4>
+                    <p style={{ textAlign: "left" }}>
+                      {comment.content}
+                    </p>
+                    <p style={{ textAlign: "left", color: "gray" }}>
+                      {"posted " + moment(comment.date).fromNow()}
+                    </p>
+                  </Grid>
+                </Grid>
+              </Paper>
+            ))}
           </Stack>
         </div>
       );

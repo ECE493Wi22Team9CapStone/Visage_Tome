@@ -24,3 +24,4 @@ class EditableSetting(Singleton):
     # lifespan are in unit of days
     guest_post_lifespan = models.IntegerField(default=7)
     user_post_lifespan = models.IntegerField(default=30)
+    like_lifespan_add = models.IntegerField(default=1)
