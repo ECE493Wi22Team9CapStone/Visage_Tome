@@ -8,12 +8,13 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     date_posted = models.DateTimeField(auto_now_add=True)
+    date_expiry = models.DateTimeField(null=True, blank=True)
     tags = models.CharField(max_length=200, default="")
-    #TODO: media field (Photo/Video)
+    #TODO: add video field
 
     def __str__(self):
         return "(" + self.id + ") " + self.title
 
 class Image(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_images")
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='')

@@ -51,6 +51,7 @@ CORS_ALLOWED_ORIGINS = [
 INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
+    'visage_tome',
     'posts',
     'users',
     'corsheaders',
@@ -158,6 +159,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = Path.joinpath(BASE_DIR, 'static')
+
+MEDIA_URL = '/images/'
+MEDIA_ROOT = Path.joinpath(BASE_DIR, 'images')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
