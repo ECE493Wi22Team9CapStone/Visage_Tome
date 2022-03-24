@@ -1,5 +1,5 @@
-from .models import Post, Image
-from .serializers import PostSerializer
+from .models import User
+from .serializers import UserSerializer
 
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, ListCreateAPIView
@@ -7,60 +7,80 @@ from rest_framework.response import Response
 from rest_framework import status, permissions, exceptions
 
 import uuid
+import bcrypt
+from rest_framework.authtoken.models import Token
 
-class PostListView(ListCreateAPIView):
-    serializer_class = PostSerializer
+class UserView(APIView):
+    serializer_class = UserSerializer
+
+    # login
+    def post(self, request):
+        data = request.data
+
+        expectedFields = ['username', 'password']
+        if not all(field in expectedFields for field in data):
+            return Response("Missing fields", status=status.HTTP_400_BAD_REQUEST)
+
+        # grab user
+        try:
+            user = User.objects.get(username=data['username'])
+            if user.isbanned:
+                return Response("This account is banned", status=status.HTTP_401_UNAUTHORIZED)
+
+            # user = UserSerializer(user)
+        except User.DoesNotExist:
+            return Response("User doesn't exist", status=status.HTTP_400_BAD_REQUEST)
+
+        pwd = user.password
+        enc_pwd = bcrypt.hashpw(data['password'].encode("utf-8"), bcrypt.gensalt())
+        if bcrypt.checkpw(pwd.encode("utf-8"), enc_pwd):
+            return Response("Invalid Password", status=status.HTTP_400_BAD_REQUEST)
+
+        token = Token.objects.get(user=user)
+        res = {"msg": "login success", "token": token.key}
+        return Response(res, status=status.HTTP_200_OK)
+
+    # patch changes user info
+    # to ban a user we change their
+    def patch(self, request):
+        try:
+            user = User.objects.get(username=request.data['username'])
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response("Successful update {}".format(request.data), status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response("User doesn't exist", status=status.HTTP_400_BAD_REQUEST)
+
+        return Response("Invalid request", status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserSignupView(APIView):
+    serializer_class = UserSerializer
 
     def get(self, request):
-        posts = Post.objects.all()
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
+        return Response("wrong", status=status.HTTP_200_OK)
 
     def post(self, request):
-        post_id = uuid.uuid4()
-        return PostDetailView().post(request, post_id)
+        data = request.data
 
-class PostDetailView(APIView):
-    serializer_class = PostSerializer
+        # validate fields
+        tmp_serializer = UserSerializer(data=data)
+        if not tmp_serializer.is_valid():
+            return Response(tmp_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request, post_id):
-        """
-        ## Description:
-        Get the post with the id post_id
-        ## Responses:
-        **200**: for successful GET request, the post JSON is returned <br>
-        **404**: if the post_id does not exist
-        """
         try:
-            post = Post.objects.get(id=post_id)
-            serializer = PostSerializer(post)
-            return Response(serializer.data)
-        except Post.DoesNotExist:
-            return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
-
-    def post(self, request, post_id):
-        """
-        ## Description:
-        create a new post with the id post_id
-        ## Responses:
-        **200**: for successful POST request, the post JSON is returned <br>
-        **400**: if the payload failed the serializer check <br>
-        **409**: if the post_id already exist
-        """
-        try:
-            post = Post.objects.get(id=post_id)
-            return Response("Post id already exist", status=status.HTTP_409_CONFLICT)
-        except Post.DoesNotExist:
-            if "images" not in request.data:
-                return Response("Post does not include 'images' field", status=status.HTTP_400_BAD_REQUEST)
-            serializer = PostSerializer(data=request.data)
+            user = User.objects.get(username=data['username'])
+        except User.DoesNotExist:
+            pwd = data['password'].encode('utf-8')
+            enc_pwd = bcrypt.hashpw(pwd, bcrypt.gensalt()).decode('utf-8')
+            user = {"password": enc_pwd, "username": data['username']}
+            serializer = UserSerializer(data=user)
             if serializer.is_valid():
-                post = serializer.save()
-                for image in request.data.getlist("images"):
-                    Image.objects.create(post=post, image=image)
-                return Response(serializer.data)
+                user = serializer.save()
+                token = Token.objects.create(user=user)
+                return Response({"msg": "success, created user {}".format(user.username), "token": token.key}, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, post_id):
-        pass
+        return Response("User with username already exists", status=status.HTTP_409_CONFLICT)

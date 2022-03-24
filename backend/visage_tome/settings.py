@@ -49,6 +49,10 @@ CORS_ALLOWED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
+    'rest_framework.authtoken',
+    'posts',
+    'users',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -56,9 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'drf_spectacular',
-    'posts'
 ]
 
 REST_FRAMEWORK = {
@@ -161,3 +163,6 @@ STATIC_ROOT = Path.joinpath(BASE_DIR, 'static')
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.User'
+
