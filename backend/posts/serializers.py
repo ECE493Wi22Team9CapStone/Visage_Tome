@@ -17,7 +17,7 @@ class PostSerializer(ModelSerializer):
         return Like.objects.filter(post__id=obj.id).count()
 
     def get_comments(self, obj):
-        comments = Comment.objects.filter(post__id=obj.id)
+        comments = Comment.objects.filter(post__id=obj.id).order_by('-date')
         return CommentSerializer(comments, many=True).data
 
     class Meta:
