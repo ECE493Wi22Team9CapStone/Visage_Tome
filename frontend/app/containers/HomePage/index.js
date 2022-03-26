@@ -13,6 +13,12 @@ import ImageListItem from '@mui/material/ImageListItem';
 import Pagination from '@mui/material/Pagination';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
 import LoadingIndicator from 'components/LoadingIndicator';
 import axios from 'axios';
@@ -23,9 +29,10 @@ class HomePage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      posts: [],
+      posts: null,
       totalPages: 1,
-      postId: null
+      postId: null,
+      searchText: "",
     }
 
     this.onPageChange = this.onPageChange.bind(this);
@@ -39,9 +46,8 @@ class HomePage extends React.Component {
     });
   }  
   
-  
   requestPosts = (page) => {
-    axios.get(`${BACKEND_URL}/posts/?page=${page}`)
+    axios.get(`${BACKEND_URL}/posts/?page=${page}&search=${this.state.searchText}`)
     .then(res => {
       console.log(res.data);
       this.setState({
@@ -51,6 +57,15 @@ class HomePage extends React.Component {
     })
     .catch(err => {
       console.log("Failed to get posts: ", err);
+    });
+  }
+
+  handleSearch = (text) => {
+    // setState is async, so use callback to make sure value is set before making request
+    this.setState({
+      searchText: text
+    }, () => {
+      this.requestPosts(1);
     });
   }
 
@@ -70,7 +85,7 @@ class HomePage extends React.Component {
     }
 
     let postList;
-    if (this.state.posts.length > 0) {
+    if (this.state.posts != null && this.state.posts.length > 0) {
       postList = (
         <ImageList variant="masonry" cols={3} gap={10}>
           {this.state.posts.map((item) => { 
@@ -93,8 +108,10 @@ class HomePage extends React.Component {
           })}
         </ImageList>
       );
+    } else if (this.state.posts === null) {
+      postList = <center><LoadingIndicator /></center>
     } else {
-      postList = <LoadingIndicator />
+      postList = <p><center>No posts found</center></p>
     }
 
     return (
@@ -117,7 +134,37 @@ class HomePage extends React.Component {
           noValidate
           autoComplete="off"
         >
-          
+          <Paper elavation={12}>
+            <TextField
+              fullWidth
+              id="search-post"
+              type="text"
+              placeholder="Search by title, author, or tags"
+              variant="outlined"
+              value={this.state.searchText}
+              onChange={(event) => this.handleSearch(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                      <IconButton aria-label="search">
+                        <SearchIcon  />
+                      </IconButton>
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="start">
+                      <IconButton>
+                        <ClearIcon 
+                          fontSize='small' 
+                          onClick={() => this.handleSearch("")}
+                        />
+                      </IconButton>
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Paper>
+
           {postList}
 
           <Pagination 

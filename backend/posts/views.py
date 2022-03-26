@@ -5,6 +5,7 @@ from .serializers import CommentSerializer, PostSerializer
 from .pagination import PostPagination
 
 from django.utils import timezone
+from django.db.models import Q
 
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, ListCreateAPIView
@@ -18,7 +19,17 @@ class PostListView(ListCreateAPIView):
     pagination_class = PostPagination
 
     def get_queryset(self):
-        return Post.objects.filter(date_expiry__gt=timezone.now()).order_by('-date_posted')
+        queryset = Post.objects.filter(date_expiry__gt=timezone.now()).order_by('-date_posted')
+        search = self.request.query_params.get('search', None)
+
+        if search is not None and len(search) > 0:
+            queryset = queryset.filter(
+                Q(title__icontains=search) |
+                Q(display_name__icontains=search) |
+                Q(tags__icontains=search)
+            )
+
+        return queryset
 
     def get(self, request, *args, **kwargs):
         """
