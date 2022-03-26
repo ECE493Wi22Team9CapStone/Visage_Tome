@@ -117,23 +117,25 @@ class HomePage extends React.Component {
           noValidate
           autoComplete="off"
         >
+          
           {postList}
 
+          <Pagination 
+            count={this.state.totalPages} 
+            sx={{
+              'display': 'flex',
+              'alignItems': 'center',
+              'justifyContent': 'center',
+            }} 
+            color="primary"
+            size="large"
+            boundaryCount={2}
+            onChange={(e, page) => {this.onPageChange(page)}}
+            showFirstButton 
+            showLastButton
+          />
         </Stack>
-        <Pagination 
-          count={this.state.totalPages} 
-          sx={{
-            'display': 'flex',
-            'alignItems': 'center',
-            'justifyContent': 'center',
-          }} 
-          color="primary"
-          size="large"
-          boundaryCount={2}
-          onChange={(e, page) => {this.onPageChange(page)}}
-          showFirstButton 
-          showLastButton
-        />
+        
       </div>
     );
   }
