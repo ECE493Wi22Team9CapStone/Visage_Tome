@@ -34,5 +34,9 @@ export default defineMessages({
   confirm: {
     id: `${scope}.confirm`,
     defaultMessage: 'Confirm',
+  },
+  lifespan: {
+    id: `${scope}.lifespan`,
+    defaultMessage: 'Lifespan',
   }
 });
