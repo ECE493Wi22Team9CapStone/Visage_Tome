@@ -19,6 +19,8 @@ import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 import LoadingIndicator from 'components/LoadingIndicator';
 import axios from 'axios';
@@ -33,6 +35,7 @@ class HomePage extends React.Component {
       totalPages: 1,
       postId: null,
       searchText: "",
+      status: this.props.location.state ? this.props.location.state.status : null,
     }
 
     this.onPageChange = this.onPageChange.bind(this);
@@ -49,7 +52,6 @@ class HomePage extends React.Component {
   requestPosts = (page) => {
     axios.get(`${BACKEND_URL}/posts/?page=${page}&search=${this.state.searchText}`)
     .then(res => {
-      console.log(res.data);
       this.setState({
         posts: res.data.posts,
         totalPages: res.data.count
@@ -124,6 +126,25 @@ class HomePage extends React.Component {
           />
         </Helmet>
         
+        <Snackbar
+          open={this.state.status === "deletePostSuccess"}
+          autoHideDuration={5000}
+          onClose={() => this.setState({status: ""})}
+          anchorOrigin={{ 
+            vertical: "top", 
+            horizontal: 'center',
+          }}
+        >
+          <Alert 
+            onClose={() => this.setState({status: ""})} 
+            severity="success" 
+            sx={{ width: '100%' }}
+            variant="filled"
+          >
+            Post Successfully Deleted
+          </Alert>
+        </Snackbar>
+
         <Stack
           component="form"
           sx={{
@@ -153,11 +174,8 @@ class HomePage extends React.Component {
                 ),
                 endAdornment: (
                   <InputAdornment position="start">
-                      <IconButton>
-                        <ClearIcon 
-                          fontSize='small' 
-                          onClick={() => this.handleSearch("")}
-                        />
+                      <IconButton onClick={() => this.handleSearch("")}>
+                        <ClearIcon fontSize='small' />
                       </IconButton>
                   </InputAdornment>
                 )

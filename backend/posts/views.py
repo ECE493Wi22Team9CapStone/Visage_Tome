@@ -95,7 +95,19 @@ class PostDetailView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, post_id):
-        pass
+        """
+        ## Description:
+        delete the post with the id post_id
+        ## Responses:
+        **204**: for successful DELETE request <br>
+        **404**: if the post_id does not exist
+        """
+        try:
+            post = Post.objects.get(id=post_id)
+            post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Post.DoesNotExist:
+            return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
 
 class PostLikeView(APIView):
     def post(self, request, post_id):
