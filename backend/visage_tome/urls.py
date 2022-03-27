@@ -35,7 +35,7 @@ urlpatterns = [
 
     # admin
     path('admin/', admin.site.urls),
-    path('tagging/', include('tagging.urls'))
+    path('tagging/', include('tagging.urls')),
 
     path('api/', VisageTomeAPIView.as_view(), name='visage-tome-generic')
 ]
