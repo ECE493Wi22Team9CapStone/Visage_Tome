@@ -9,13 +9,14 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import styled from 'styled-components';
-import { Switch, Route } from 'react-router-dom';
+import {Switch, Route, Redirect} from 'react-router-dom';
 
 import HomePage from 'containers/HomePage/Loadable';
 import FeaturePage from 'containers/FeaturePage/Loadable';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import CreatePostPage from 'containers/CreatePostPage/Loadable';
 import PostDetailPage from 'containers/PostDetailPage/Loadable';
+import AdminPage from 'containers/AdminPage/Loadable'
 import Header from 'components/Header';
 import Footer from 'components/Footer';
 
@@ -45,6 +46,9 @@ export default function App() {
         <Route path="/features" component={FeaturePage} />
         <Route path="/create" component={CreatePostPage} />
         <Route path="/post/:id" component={PostDetailPage} />
+        <Route path="/admin">
+          {localStorage.getItem('admin') === 'true' ? <AdminPage/> : <Redirect to="/"/>}
+        </Route>
         <Route path="" component={NotFoundPage} />
       </Switch>
       <Footer />
