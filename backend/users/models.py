@@ -1,12 +1,14 @@
 import uuid
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
-# Create your models here.
+
 class User(AbstractUser):
     username = models.CharField(primary_key=True, max_length=100)
     password = models.CharField(max_length=100)
-    isbanned = models.BooleanField(default=False)
+    bantime = models.DateTimeField(default=timezone.now)
 
     USERNAME_FIELD='username'
 

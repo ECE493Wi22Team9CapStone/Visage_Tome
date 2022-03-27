@@ -1,3 +1,5 @@
+from django.utils import timezone
+
 from .models import User
 from .serializers import UserSerializer
 
@@ -24,10 +26,10 @@ class UserView(APIView):
         # grab user
         try:
             user = User.objects.get(username=data['username'])
-            if user.isbanned:
+            if user.bantime > timezone.now():
                 return Response("This account is banned", status=status.HTTP_401_UNAUTHORIZED)
 
-            # user = UserSerializer(user)
+        # user = UserSerializer(user)
         except User.DoesNotExist:
             return Response("User doesn't exist", status=status.HTTP_400_BAD_REQUEST)
 
@@ -49,6 +51,7 @@ class UserView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response("Successful update {}".format(request.data), status=status.HTTP_200_OK)
+
         except User.DoesNotExist:
             return Response("User doesn't exist", status=status.HTTP_400_BAD_REQUEST)
 
