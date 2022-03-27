@@ -45,6 +45,7 @@ class PostDetailPage extends React.Component {
       comment: "",
       deleteDialogState: "inactive",
       isAdmin: localStorage.getItem('admin') === 'true',
+      commentError: "",
     }
     
     this.onLikeButtonClick = this.onLikeButtonClick.bind(this);
@@ -77,6 +78,10 @@ class PostDetailPage extends React.Component {
   }
 
   onCommentSend = () => {
+    if(this.state.comment.length === 0 || !this.state.comment.trim()) {
+      this.setState({commentError: "Cannot make an empty comment"});
+      return;
+    }
     axios.post(`${BACKEND_URL}/posts/${this.state.postId}/comment/`, {
       content: this.state.comment
     })
@@ -365,7 +370,8 @@ class PostDetailPage extends React.Component {
               )
             }}
             value={this.state.comment}
-            onChange={(event) => this.setState({comment: event.target.value})}
+            onChange={(event) => this.setState({comment: event.target.value, commentError: ""})}
+            helperText={this.state.commentError}
           />
 
           {/* https://codesandbox.io/s/comment-box-with-material-ui-10p3c */}

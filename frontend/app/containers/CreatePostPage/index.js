@@ -40,7 +40,8 @@ class CreatePostPage extends React.Component {
 
   onImageUpload = (event) => {
     this.setState({
-      images: [...this.state.images, ...event.target.files]
+      images: [...this.state.images, ...event.target.files],
+      imgError: "",
     });
   }
 
@@ -96,9 +97,16 @@ class CreatePostPage extends React.Component {
     }
 
     if (this.state.tags.join(',').length === 0 || !this.state.tags.join(',').trim()) {
+
       this.setState({tagError: "You need at least one tag"});
       fieldCheck = false;
     }
+    
+    if (this.state.images.length === 0) {
+      this.setState({imgError: "You need at least one image to create a post"});
+      fieldCheck = false;
+    }
+
     if (fieldCheck != false) {
       let formData = new FormData();
       formData.append('display_name', this.state.displayName);
@@ -186,7 +194,7 @@ class CreatePostPage extends React.Component {
               onChange={(event) => this.setState({postDescription: event.target.value})}
             />
             
-            <ImageList variant="masonry" cols={3}>
+            <ImageList variant="masonry" cols={3} >
               {this.state.images.map((item) => (
                 <ImageListItem 
                   key={item.name}
@@ -220,6 +228,7 @@ class CreatePostPage extends React.Component {
             >
               Tag Images
             </Button>
+            <div style={{color: "red"}}>{this.state.imgError}</div>
 
             <Autocomplete
               multiple
@@ -238,11 +247,11 @@ class CreatePostPage extends React.Component {
                 variant="outlined"
                 label="Tags"
                 placeholder="Add some tags to your image"
+                helperText={this.state.tagError}
               />
               )}
               value={this.state.tags}
               onChange={(event, value) => this.setState({tags: value, tagError: ""})}
-              helperText={this.state.tagError}
             />
 
             <Stack 

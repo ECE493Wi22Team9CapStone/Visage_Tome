@@ -74,6 +74,8 @@ function Header() {
     )
   }
 
+
+
   const openLogin = () => {
     setLoginModal(true);
     setErrorMessage('');
@@ -115,6 +117,31 @@ function Header() {
 
 
   const signup = () => {
+    let usernameCheck = true;
+    let passwordCheck = true;
+    if (username.length < 3 || !username.trim()) {
+      usernameCheck = false;
+    }
+
+    if (password.length < 8 || !password.trim()) {
+      passwordCheck = false;
+    }
+
+    if (usernameCheck != true && passwordCheck != true) {
+      setErrorMessage("Username must be at least 3 characters, Password must be at least 8 characters");
+      setUsername('');
+      setPassword('');
+      return;
+    } else if (usernameCheck != true ) {
+      setErrorMessage("Username must be at least 3 characters");
+      setUsername('');
+      return;
+    } else if (passwordCheck != true) {
+      setErrorMessage("Password must be at least 8 characters");
+      setPassword('');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setErrorMessage("password does not match");
       setConfirmPassword('');
