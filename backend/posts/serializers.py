@@ -2,7 +2,6 @@ from datetime import timedelta
 from .models import Post, Image, Comment, Like
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from visage_tome.models import EditableSetting
 
 class PostSerializer(ModelSerializer):
     images = serializers.SerializerMethodField()
@@ -23,10 +22,10 @@ class PostSerializer(ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'id', 
-            'display_name', 
-            'title', 
-            'description', 
+            'id',
+            'display_name',
+            'title',
+            'description',
             'date_posted',
             'date_expiry',
             'tags',
