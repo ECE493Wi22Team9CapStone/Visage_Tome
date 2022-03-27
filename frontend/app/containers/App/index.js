@@ -14,6 +14,8 @@ import { Switch, Route } from 'react-router-dom';
 import HomePage from 'containers/HomePage/Loadable';
 import FeaturePage from 'containers/FeaturePage/Loadable';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
+import CreatePostPage from 'containers/CreatePostPage/Loadable';
+import PostDetailPage from 'containers/PostDetailPage/Loadable';
 import Header from 'components/Header';
 import Footer from 'components/Footer';
 
@@ -32,8 +34,8 @@ export default function App() {
   return (
     <AppWrapper>
       <Helmet
-        titleTemplate="%s - React.js Boilerplate"
-        defaultTitle="React.js Boilerplate"
+        titleTemplate="%s - Visage Tome"
+        defaultTitle="Visage Tome"
       >
         <meta name="description" content="A React.js Boilerplate application" />
       </Helmet>
@@ -41,6 +43,8 @@ export default function App() {
       <Switch>
         <Route exact path="/" component={HomePage} />
         <Route path="/features" component={FeaturePage} />
+        <Route path="/create" component={CreatePostPage} />
+        <Route path="/post/:id" component={PostDetailPage} />
         <Route path="" component={NotFoundPage} />
       </Switch>
       <Footer />

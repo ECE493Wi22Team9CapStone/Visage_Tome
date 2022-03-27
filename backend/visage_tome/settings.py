@@ -41,10 +41,15 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -52,8 +57,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_spectacular',
-    'posts'
+    'visage_tome',
+    'posts',
+    'users',
+    'tagging',
 ]
 
 REST_FRAMEWORK = {
@@ -73,6 +82,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -151,7 +161,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = Path.joinpath(BASE_DIR, 'static')
 
+MEDIA_URL = '/images/'
+MEDIA_ROOT = Path.joinpath(BASE_DIR, 'images')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.User'
