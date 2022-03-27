@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 
 from .models import User
@@ -11,6 +12,7 @@ from rest_framework import status, permissions, exceptions
 import uuid
 import bcrypt
 from rest_framework.authtoken.models import Token
+
 
 class UserView(APIView):
     serializer_class = UserSerializer
@@ -33,9 +35,7 @@ class UserView(APIView):
         except User.DoesNotExist:
             return Response("User doesn't exist", status=status.HTTP_400_BAD_REQUEST)
 
-        pwd = user.password
-        enc_pwd = bcrypt.hashpw(data['password'].encode("utf-8"), bcrypt.gensalt())
-        if bcrypt.checkpw(pwd.encode("utf-8"), enc_pwd):
+        if not check_password(data['password'], user.password):
             return Response("Invalid Password", status=status.HTTP_400_BAD_REQUEST)
 
         token = Token.objects.get_or_create(user=user)[0]
@@ -75,15 +75,9 @@ class UserSignupView(APIView):
         try:
             user = User.objects.get(username=data['username'])
         except User.DoesNotExist:
-            pwd = data['password'].encode('utf-8')
-            enc_pwd = bcrypt.hashpw(pwd, bcrypt.gensalt()).decode('utf-8')
-            user = {"password": enc_pwd, "username": data['username']}
-            serializer = UserSerializer(data=user)
-            if serializer.is_valid():
-                user = serializer.save()
-                token = Token.objects.create(user=user)
-                return Response({"msg": "success, created user {}".format(user.username), "token": token.key}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.create_user(username=data['username'], password=data['password'])
+            token = Token.objects.create(user=user)
+            return Response({"msg": "success, created user {}".format(user.username), "token": token.key},
+                            status=status.HTTP_201_CREATED)
 
         return Response("User with username already exists", status=status.HTTP_409_CONFLICT)
