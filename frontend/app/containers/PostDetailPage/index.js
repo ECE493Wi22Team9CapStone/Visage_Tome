@@ -44,8 +44,7 @@ class PostDetailPage extends React.Component {
       liked: false,
       comment: "",
       deleteDialogState: "inactive",
-      // TODO: change to check with user
-      isAdmin: true,
+      isAdmin: localStorage.getItem('admin') === 'true',
     }
     
     this.onLikeButtonClick = this.onLikeButtonClick.bind(this);
