@@ -55,7 +55,7 @@ class UserView(APIView):
         except User.DoesNotExist:
             return Response("User doesn't exist", status=status.HTTP_400_BAD_REQUEST)
 
-        return Response("Invalid request", status=status.HTTP_400_BAD_REQUEST)
+        return Response("Invalid resrequest", status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSignupView(APIView):

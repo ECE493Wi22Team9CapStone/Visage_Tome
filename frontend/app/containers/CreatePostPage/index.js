@@ -23,7 +23,7 @@ class CreatePostPage extends React.Component {
       displayName: "",
       postTitle: "",
       postDescription: "",
-      tags: "",
+      tags: [],
       images: [],
       isCreated: false,
     }
@@ -31,6 +31,7 @@ class CreatePostPage extends React.Component {
     this.onImageUpload = this.onImageUpload.bind(this);
     this.onImageRemove = this.onImageRemove.bind(this);
     this.onCreateClick = this.onCreateClick.bind(this);
+    this.onTagClick = this.onTagClick.bind(this);
   }
 
   onImageUpload = (event) => {
@@ -44,6 +45,32 @@ class CreatePostPage extends React.Component {
       images: this.state.images.filter(image => image !== item)
     });
   }
+  onTagClick = () => {
+    let formData = new FormData();
+    for (let i = 0; i < this.state.images.length; i++) {
+      formData.append('images', this.state.images[i]);
+    }
+
+    let backendUrl = `${BACKEND_URL}/tagging/`;
+
+    axios.post(backendUrl, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    })
+    .then(res => {
+      if (res.status === 200) {
+        console.log(res.data);
+        this.setState({
+          tags: res.data.tags
+        });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
+  }
+  
   
   onCreateClick = () => {
     let formData = new FormData();
@@ -156,6 +183,14 @@ class CreatePostPage extends React.Component {
               />
             </Button>
 
+            <Button
+              variant="contained"
+              component="label"
+              onClick={this.onTagClick}
+            >
+              Tag Images
+            </Button>
+
             <Autocomplete
               multiple
               freeSolo
@@ -175,6 +210,7 @@ class CreatePostPage extends React.Component {
                 placeholder="Add some tags to your image"
               />
               )}
+              value={this.state.tags}
               onChange={(event, value) => this.setState({tags: value})}
             />
 
