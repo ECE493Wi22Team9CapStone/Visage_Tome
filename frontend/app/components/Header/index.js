@@ -95,6 +95,7 @@ function Header() {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
+    localStorage.removeItem('admin');
     setToken('');
     setLoggedInUsername('');
   }
@@ -191,6 +192,7 @@ function Header() {
         setToken(res.data.token);
         localStorage.setItem("username", username);
         setLoggedInUsername(username);
+        localStorage.setItem("admin", res.data.admin);
         closeLogin()
       }
     }).catch(err => {
