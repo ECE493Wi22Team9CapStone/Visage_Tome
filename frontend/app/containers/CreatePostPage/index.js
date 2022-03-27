@@ -26,6 +26,10 @@ class CreatePostPage extends React.Component {
       tags: [],
       images: [],
       isCreated: false,
+      displayError: "",
+      titleError: "",
+      tagError: "",
+      imgError: "",
     }
 
     this.onImageUpload = this.onImageUpload.bind(this);
@@ -46,59 +50,83 @@ class CreatePostPage extends React.Component {
     });
   }
   onTagClick = () => {
-    let formData = new FormData();
-    for (let i = 0; i < this.state.images.length; i++) {
-      formData.append('images', this.state.images[i]);
+
+    if (this.state.images.length != 0) {
+      let formData = new FormData();
+      for (let i = 0; i < this.state.images.length; i++) {
+        formData.append('images', this.state.images[i]);
+      }
+  
+      let backendUrl = `${BACKEND_URL}/tagging/`;
+  
+      axios.post(backendUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      })
+      .then(res => {
+        if (res.status === 200) {
+          console.log(res.data);
+          this.setState({
+            tags: res.data.tags
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    } else {
+      this.setState({imgError: "You need an image to run the AutoTagger"});
     }
 
-    let backendUrl = `${BACKEND_URL}/tagging/`;
-
-    axios.post(backendUrl, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    })
-    .then(res => {
-      if (res.status === 200) {
-        console.log(res.data);
-        this.setState({
-          tags: res.data.tags
-        });
-      }
-    })
-    .catch(err => {
-      console.log(err);
-    });
+    
   }
   
   
   onCreateClick = () => {
-    let formData = new FormData();
-    formData.append('display_name', this.state.displayName);
-    formData.append('title', this.state.postTitle);
-    formData.append('description', this.state.postDescription);
-    formData.append('tags', this.state.tags.join(','));
-    for (let i = 0; i < this.state.images.length; i++) {
-      formData.append('images', this.state.images[i]);
+    let fieldCheck = true;
+    if (this.state.displayName.length === 0 || !this.state.displayName.trim()) {
+      this.setState({displayError: "You need to enter a name"});
+      fieldCheck = false;
     }
 
-    let backendUrl = `${BACKEND_URL}/posts/`;
+    if (this.state.postTitle.length === 0 || !this.state.postTitle.trim()) {
+      this.setState({titleError: "You need a title"});
+      fieldCheck = false;
+    }
 
-    axios.post(backendUrl, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    if (this.state.tags.join(',').length === 0 || !this.state.tags.join(',').trim()) {
+      this.setState({tagError: "You need at least one tag"});
+      fieldCheck = false;
+    }
+    if (fieldCheck != false) {
+      let formData = new FormData();
+      formData.append('display_name', this.state.displayName);
+      formData.append('title', this.state.postTitle);
+      formData.append('description', this.state.postDescription);
+      formData.append('tags', this.state.tags.join(','));
+      for (let i = 0; i < this.state.images.length; i++) {
+        formData.append('images', this.state.images[i]);
       }
-    })
-    .then(res => {
-      if (res.status === 200) {
-        this.setState({
-          isCreated: true
-        });
-      }
-    })
-    .catch(err => {
-      console.log(err);
-    });
+
+      let backendUrl = `${BACKEND_URL}/posts/`;
+
+      axios.post(backendUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      })
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            isCreated: true
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    }
   }
 
 	render() {
@@ -133,7 +161,8 @@ class CreatePostPage extends React.Component {
               label="Display Name"
               variant="outlined"
               value={this.state.displayName}
-              onChange={(event) => this.setState({displayName: event.target.value})}
+              onChange={(event) => this.setState({displayName: event.target.value, displayError: ""})}
+              helperText = {this.state.displayError}
             />
             
             <TextField
@@ -142,7 +171,8 @@ class CreatePostPage extends React.Component {
               label="Post Title"
               variant="outlined"
               value={this.state.postTitle}
-              onChange={(event) => this.setState({postTitle: event.target.value})}
+              onChange={(event) => this.setState({postTitle: event.target.value, titleError: ""})}
+              helperText = {this.state.titleError}
             />
 
             <TextField
@@ -211,7 +241,8 @@ class CreatePostPage extends React.Component {
               />
               )}
               value={this.state.tags}
-              onChange={(event, value) => this.setState({tags: value})}
+              onChange={(event, value) => this.setState({tags: value, tagError: ""})}
+              helperText={this.state.tagError}
             />
 
             <Stack 
