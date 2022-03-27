@@ -1,3 +1,5 @@
+import dateutil.parser
+
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 
@@ -42,16 +44,19 @@ class UserView(APIView):
         res = {"msg": "login success", "token": token.key, "admin": user.is_superuser}
         return Response(res, status=status.HTTP_200_OK)
 
-    # patch changes user info
-    # to ban a user we change their
+    # only allowed to patch for banId
     def patch(self, request):
+        bantime = timezone.now()
+        if request.data.get('bantime', ''):
+            bantime = dateutil.parser.isoparse(request.data['bantime'])
+
         try:
+            bantime = {"bantime": bantime}
             user = User.objects.get(username=request.data['username'])
-            serializer = UserSerializer(user, data=request.data, partial=True)
+            serializer = UserSerializer(user, data=bantime, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response("Successful update {}".format(request.data), status=status.HTTP_200_OK)
-
         except User.DoesNotExist:
             return Response("User doesn't exist", status=status.HTTP_400_BAD_REQUEST)
 
