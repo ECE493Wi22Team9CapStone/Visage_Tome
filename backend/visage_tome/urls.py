@@ -33,6 +33,7 @@ urlpatterns = [
 
     # admin
     path('admin/', admin.site.urls),
+    path('tagging/', include('tagging.urls'))
 
 ]
 

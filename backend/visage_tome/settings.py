@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'visage_tome',
     'posts',
     'users',
+    'tagging',
 ]
 
 REST_FRAMEWORK = {
