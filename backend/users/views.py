@@ -36,8 +36,8 @@ class UserView(APIView):
         if bcrypt.checkpw(pwd.encode("utf-8"), enc_pwd):
             return Response("Invalid Password", status=status.HTTP_400_BAD_REQUEST)
 
-        token = Token.objects.get(user=user)
-        res = {"msg": "login success", "token": token.key}
+        token = Token.objects.get_or_create(user=user)[0]
+        res = {"msg": "login success", "token": token.key, "admin": user.is_superuser}
         return Response(res, status=status.HTTP_200_OK)
 
     # patch changes user info
