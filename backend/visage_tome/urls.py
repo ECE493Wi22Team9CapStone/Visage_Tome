@@ -19,6 +19,8 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from .views import VisageTomeAPIView
+
 urlpatterns = [
     # root
     path('schema/', SpectacularAPIView.as_view(), name='open-schema'),
@@ -33,8 +35,9 @@ urlpatterns = [
 
     # admin
     path('admin/', admin.site.urls),
-    path('tagging/', include('tagging.urls'))
+    path('tagging/', include('tagging.urls')),
 
+    path('api/', VisageTomeAPIView.as_view(), name='visage-tome-generic')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
