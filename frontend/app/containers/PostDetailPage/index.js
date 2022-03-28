@@ -34,6 +34,7 @@ import H1 from 'components/H1';
 import H2 from 'components/H2';
 import LoadingIndicator from 'components/LoadingIndicator';
 import { BACKEND_URL } from 'utils/constants';
+import TimerComponent from './timer';
 
 class PostDetailPage extends React.Component {
   constructor(props) {
@@ -142,6 +143,13 @@ class PostDetailPage extends React.Component {
       }} />
     } 
 
+    let now = moment();
+    let expiryTime = moment(this.state.post.date_expiry);
+    let duration = expiryTime.diff(now, 'seconds');
+
+    // let hours = expiryTime.subtract(days, 'days').diff(now, 'hours');
+    // let minutes = expiryTime.subtract(hours, 'hours').diff(now, 'minutes');
+    // let seconds = expiryTime.subtract(minutes, 'minutes').diff(now, 'seconds');
     return (
       <div>
         <Helmet>
@@ -303,6 +311,12 @@ class PostDetailPage extends React.Component {
 
           </Stack>
           
+          <H2>
+            <FormattedMessage {...messages.lifespan} />
+          </H2>
+
+          <TimerComponent duration={duration} />
+
           <Stack 
             sx={{
               position: 'relative',
@@ -375,8 +389,8 @@ class PostDetailPage extends React.Component {
           />
 
           {/* https://codesandbox.io/s/comment-box-with-material-ui-10p3c */}
-          {this.state.post.comments.map((comment) => (
-            <Paper style={{ padding: "30px 20px" }} elavation={6}>
+          {this.state.post.comments.map((comment, index) => (
+            <Paper key={"comment " + index} style={{ padding: "30px 20px" }} elavation={6}>
               <Grid container wrap="nowrap" spacing={2}>
                 <Grid item >
                   <FaceIcon 
