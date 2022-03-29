@@ -1,4 +1,4 @@
-// react librairies
+// react module components
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { Redirect } from 'react-router-dom';
@@ -6,7 +6,7 @@ import axios from 'axios';
 import { FormattedMessage } from 'react-intl';
 import moment from 'moment';
 
-// react mui library
+// react mui components
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import TextField from '@mui/material/TextField';
@@ -30,7 +30,7 @@ import SendIcon from '@mui/icons-material/Send';
 import FaceIcon from '@mui/icons-material/Face';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-// custom librairies and definitions
+// custom components and definitions
 import messages from './messages';
 import H1 from 'components/H1';
 import H2 from 'components/H2';

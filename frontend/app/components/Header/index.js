@@ -1,16 +1,24 @@
+// react modules components
 import React, {useRef, useState} from 'react';
+import axios from "axios";
+import {FormattedMessage} from "react-intl";
 
-import NavBar from './NavBar';
+// react mui components
 import Grid from "@mui/material/Grid";
-import Item from "../ListItem/Item";
 import Button from "@mui/material/Button";
+import HomeIcon from '@mui/icons-material/Home';
+import AddIcon from '@mui/icons-material/Add';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 import {Modal, TextField, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
+
+// custom components and definitions
 import HeaderLink from "./HeaderLink";
-import {FormattedMessage} from "react-intl";
 import messages from "./messages";
 import {BACKEND_URL} from "../../utils/constants";
-import axios from "axios";
+import NavBar from './NavBar';
+import Item from "../ListItem/Item";
 
 function Header() {
   const customStyles = {
@@ -65,7 +73,7 @@ function Header() {
     return (
       <Grid container spacing={1}>
         <Grid item xs={6}>
-          <Button style={customStyles.authButtons} variant="outlined" onClick={openLogin}>Login</Button>
+          <Button startIcon={<LoginIcon/>} style={customStyles.authButtons} variant="outlined" onClick={openLogin}>Login</Button>
         </Grid>
         <Grid item xs={6}>
           <Button style={customStyles.authButtons} variant="outlined" onClick={openSignup}>Signup</Button>
@@ -110,7 +118,7 @@ function Header() {
           <Typography variant="body1">{loggedInUsername}</Typography>
         </Grid>
         <Grid item xs={6}>
-          <Button style={customStyles.authButtons} variant="outlined" onClick={logout}>Logout</Button>
+          <Button startIcon={<LogoutIcon/>} style={customStyles.authButtons} variant="outlined" onClick={logout}>Logout</Button>
         </Grid>
       </Grid>
     )
@@ -283,9 +291,11 @@ function Header() {
         </Grid>
         <Box style={customStyles.borderLine}/>
         <HeaderLink to="/">
+          <HomeIcon />
           <FormattedMessage {...messages.home} />
         </HeaderLink>
         <HeaderLink to="/create">
+          <AddIcon />
           <FormattedMessage {...messages.create} />
         </HeaderLink>
       </NavBar>

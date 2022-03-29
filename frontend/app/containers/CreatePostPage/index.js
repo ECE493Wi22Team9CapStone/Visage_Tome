@@ -10,6 +10,13 @@ import Chip from '@mui/material/Chip';
 import Autocomplete from '@mui/material/Autocomplete';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CircularProgress from '@mui/material/CircularProgress';
+import StyleIcon from '@mui/icons-material/Style';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from '@mui/icons-material/Save';
 
 import H1 from 'components/H1';
 import messages from './messages';
@@ -29,7 +36,23 @@ class CreatePostPage extends React.Component {
       displayError: "",
       titleError: "",
       tagError: "",
-      imgError: "",
+      tagging: "inactive",
+      snakeBarStatus: "inactive"
+    }
+
+    this.snakeBarMessages = {
+      inactive: {
+        severity: "info",
+        message: "",
+      },
+      taggingSuccess: {
+        severity: "success",
+        message: <FormattedMessage {...messages.taggingSuccess} />,
+      },
+      taggingFailed: {
+        severity: "error",
+        message: <FormattedMessage {...messages.taggingFailed} />,
+      }
     }
 
     this.onImageUpload = this.onImageUpload.bind(this);
@@ -40,8 +63,7 @@ class CreatePostPage extends React.Component {
 
   onImageUpload = (event) => {
     this.setState({
-      images: [...this.state.images, ...event.target.files],
-      imgError: "",
+      images: [...this.state.images, ...event.target.files]
     });
   }
 
@@ -50,8 +72,8 @@ class CreatePostPage extends React.Component {
       images: this.state.images.filter(image => image !== item)
     });
   }
-  onTagClick = () => {
 
+  onTagClick = () => {
     if (this.state.images.length != 0) {
       let formData = new FormData();
       for (let i = 0; i < this.state.images.length; i++) {
@@ -59,7 +81,10 @@ class CreatePostPage extends React.Component {
       }
   
       let backendUrl = `${BACKEND_URL}/tagging/`;
-  
+      
+      this.setState({
+        tagging: "active"
+      });
       axios.post(backendUrl, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -67,20 +92,20 @@ class CreatePostPage extends React.Component {
       })
       .then(res => {
         if (res.status === 200) {
-          console.log(res.data);
           this.setState({
-            tags: res.data.tags
+            tags: res.data.tags,
+            tagging: "inactive",
+            snakeBarStatus: "taggingSuccess"
           });
         }
       })
       .catch(err => {
-        console.log(err);
+        this.setState({
+          tagging: "inactive",
+          snakeBarStatus: "taggingFailed"
+        });
       });
-    } else {
-      this.setState({imgError: "You need an image to run the AutoTagger"});
     }
-
-    
   }
   
   
@@ -154,6 +179,21 @@ class CreatePostPage extends React.Component {
             <FormattedMessage {...messages.header} />
           </H1>
           
+          <Snackbar
+            open={this.state.snakeBarStatus !== "inactive"}
+            autoHideDuration={5000}
+            onClose={() => this.setState({snakeBarStatus: "inactive"})}
+          >
+            <Alert 
+              onClose={() => this.setState({snakeBarStatus: "inactive"})} 
+              severity={this.snakeBarMessages[this.state.snakeBarStatus].severity}
+              sx={{ width: '100%' }}
+              variant="filled"
+            >
+              {this.snakeBarMessages[this.state.snakeBarStatus].message}
+            </Alert>
+          </Snackbar>
+
           <Stack
             component="form"
             sx={{
@@ -211,28 +251,44 @@ class CreatePostPage extends React.Component {
                 </ImageListItem>
               ))}
             </ImageList>
-
-            <Button
-              variant="contained"
-              component="label"
+            
+            <Stack
+              spacing={1}
+              direction="row"
+              sx={{
+                width: '100%'
+              }}
             >
-              <FormattedMessage {...messages.upload} />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={this.onImageUpload}
-                hidden
-              />
-            </Button>
+              <Button
+                variant="contained"
+                component="label"
+                sx={{
+                  width: '50%'
+                }}
+                startIcon={<AddPhotoAlternateIcon />}
+              >
+                <FormattedMessage {...messages.upload} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={this.onImageUpload}
+                  hidden
+                />
+              </Button>
 
-            <Button
-              variant="contained"
-              component="label"
-              onClick={this.onTagClick}
-            >
-              Tag Images
-            </Button>
-            <div style={{color: "red"}}>{this.state.imgError}</div>
+              <Button
+                variant="contained"
+                component="label"
+                disabled={this.state.images.length == 0 || this.state.tagging == "active"}
+                onClick={this.onTagClick}
+                sx={{
+                  width: '50%'
+                }}
+                startIcon={<StyleIcon />}
+              >
+                {this.state.tagging === "active" ? <CircularProgress size={20} /> : <FormattedMessage {...messages.tagImages} />}
+              </Button>
+            </Stack>
 
             <Autocomplete
               multiple
@@ -269,10 +325,10 @@ class CreatePostPage extends React.Component {
               direction={"row"} 
               spacing={5}
             >
-              <Button variant='contained' color='error' href='/'>
+              <Button startIcon={<CancelIcon />} variant='contained' color='error' href='/'>
                 <FormattedMessage {...messages.cancel} />
               </Button>
-              <Button variant='contained' color='success' onClick={this.onCreateClick}>
+              <Button startIcon={<SaveIcon />} variant='contained' color='success' onClick={this.onCreateClick}>
                 <FormattedMessage {...messages.create} />
               </Button>
             </Stack>
