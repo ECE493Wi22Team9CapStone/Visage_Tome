@@ -11,6 +11,8 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, exceptions
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 import uuid
 
@@ -110,17 +112,39 @@ class PostDetailView(APIView):
             return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
 
 class PostLikeView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, post_id):
+        """
+        ## Description:
+        This endpoint will not return the number of likes <br>
+        Instead this returns whether the user has liked the post or not
+        ## Responses:
+        **200**: returns whether the user has liked the post or not <br>
+        **404**: if the post_id does not exist
+        """
+        try:
+            post = Post.objects.get(id=post_id)
+            like = Like.objects.filter(post=post, user=request.user)
+            return Response({"liked":like.exists()}, status=status.HTTP_200_OK)
+        except Post.DoesNotExist:
+            return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
+
     def post(self, request, post_id):
         """
         ## Description:
         Like the post with the id post_id
         ## Responses:
         **200**: for successful POST request, the post JSON is returned <br>
-        **404**: if the post_id does not exist
+        **404**: if the post_id does not exist <br>
+        **409**: if the user has already liked the post
         """
         try:
             post = Post.objects.get(id=post_id)
-            like = Like.objects.create(post=post)
+            like, created = Like.objects.get_or_create(post=post, user=request.user)
+            if not created:
+                return Response("User already liked this post", status=status.HTTP_409_CONFLICT)
 
             settings = EditableSetting.load()
             try:
@@ -135,6 +159,8 @@ class PostLikeView(APIView):
             return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
 
 class PostCommentView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = CommentSerializer
 
     def post(self, request, post_id):
@@ -150,8 +176,10 @@ class PostCommentView(APIView):
             post = Post.objects.get(id=post_id)
             serializer = CommentSerializer(data=request.data)
             if serializer.is_valid():
-                comment = Comment.objects.create(post=post, **serializer.validated_data)
+                comment = Comment.objects.create(post=post, user=request.user, **serializer.validated_data)
                 comment.save()
                 return Response(PostSerializer(post).data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Post.DoesNotExist:
             return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)

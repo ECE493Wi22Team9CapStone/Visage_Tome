@@ -38,5 +38,13 @@ export default defineMessages({
   lifespan: {
     id: `${scope}.lifespan`,
     defaultMessage: 'Lifespan',
+  },
+  guestLikeClick: {
+    id: `${scope}.guestLikeClick`,
+    defaultMessage: 'You must be logged in to like this post.',
+  },
+  commentPosted: {
+    id: `${scope}.commentPosted`,
+    defaultMessage: 'Your Comment has been posted.',
   }
 });

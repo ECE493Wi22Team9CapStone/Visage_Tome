@@ -17,5 +17,5 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
-    # register
+# register
 admin.site.register(User, CustomUserAdmin)

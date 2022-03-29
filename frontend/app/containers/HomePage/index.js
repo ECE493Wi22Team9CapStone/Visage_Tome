@@ -113,7 +113,7 @@ class HomePage extends React.Component {
     } else if (this.state.posts === null) {
       postList = <center><LoadingIndicator /></center>
     } else {
-      postList = <p><center>No posts found</center></p>
+      postList = <center><p>No posts found</p></center>
     }
 
     return (

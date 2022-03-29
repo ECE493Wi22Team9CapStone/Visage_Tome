@@ -1,3 +1,13 @@
+/**
+ * This code snippet uses the 'react-countdown-circle-timer' module
+ * From https://www.npmjs.com/package/react-countdown-circle-timer
+ * 
+ * This code snippet is based from the following example provided by the module author:
+ * https://codesandbox.io/s/musing-davinci-mqssz?fontsize=14&hidenavigation=1&theme=dark
+ * 
+ * This code segment is related to FR6-Post.LifeSpan
+ */
+
 import React from 'react';
 import Stack from '@mui/material/Stack';
 import { CountdownCircleTimer } from "react-countdown-circle-timer";

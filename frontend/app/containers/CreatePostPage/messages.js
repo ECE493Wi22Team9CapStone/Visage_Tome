@@ -18,5 +18,17 @@ export default defineMessages({
     upload: {
       id: `${scope}.upload`,
       defaultMessage: 'Upload Image(s)',
+    },
+    tagImages: {
+      id: `${scope}.tagImages`,
+      defaultMessage: 'Tag Images',
+    },
+    taggingSuccess: {
+      id: `${scope}.taggingSuccess`,
+      defaultMessage: 'Successfully tagged images',
+    },
+    taggingFailed: {
+      id: `${scope}.taggingFailed`,
+      defaultMessage: 'Failed to tag images, please try again'
     }
 });
