@@ -38,7 +38,7 @@ export default function App() {
         titleTemplate="%s - Visage Tome"
         defaultTitle="Visage Tome"
       >
-        <meta name="description" content="A React.js Boilerplate application" />
+        <meta name="description" content="Winter 2022 ECE 493 Capstone Project" />
       </Helmet>
       <Header />
       <Switch>

@@ -100,6 +100,7 @@ function Header() {
     localStorage.removeItem('admin');
     setToken('');
     setLoggedInUsername('');
+    window.dispatchEvent(new Event("storage"));
   }
 
   const authComponent = () => {
@@ -220,7 +221,8 @@ function Header() {
         localStorage.setItem("username", username);
         setLoggedInUsername(username);
         localStorage.setItem("admin", res.data.admin);
-        closeLogin()
+        window.dispatchEvent(new Event("storage"));
+        closeLogin();
       }
     }).catch(err => {
       if (err.response.status) {

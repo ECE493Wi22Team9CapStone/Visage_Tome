@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from users.models import User
 
 # Create your models here.
 class Post(models.Model):
@@ -21,12 +22,11 @@ class Image(models.Model):
 
 class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_likes")
-    # TODO: uncomment
-    # user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="user_likes")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_likes", null=True)
     date = models.DateTimeField(auto_now_add=True)
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_comments")
-    username = models.CharField(max_length=100, default="Anonymous")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_comments", null=True)
     date = models.DateTimeField(auto_now_add=True)
     content = models.TextField()

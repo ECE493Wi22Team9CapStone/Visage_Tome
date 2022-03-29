@@ -164,22 +164,26 @@ class CreatePostPage extends React.Component {
             autoComplete="off"
           >
             <TextField
+              required
               id="display-name"
               type="text"
               label="Display Name"
               variant="outlined"
               value={this.state.displayName}
               onChange={(event) => this.setState({displayName: event.target.value, displayError: ""})}
+              error = {this.state.displayError.length > 0}
               helperText = {this.state.displayError}
             />
             
             <TextField
+              required
               id="post-title"
               type="text"
               label="Post Title"
               variant="outlined"
               value={this.state.postTitle}
               onChange={(event) => this.setState({postTitle: event.target.value, titleError: ""})}
+              error = {this.state.titleError.length > 0}
               helperText = {this.state.titleError}
             />
 
@@ -188,7 +192,7 @@ class CreatePostPage extends React.Component {
               fullWidth
               id="post-description"
               type="text"
-              label="Post Description"
+              label="Post Description (Optional)"
               variant="outlined"
               value={this.state.postDescription}
               onChange={(event) => this.setState({postDescription: event.target.value})}
@@ -243,10 +247,12 @@ class CreatePostPage extends React.Component {
               }
               renderInput={(params) => (
               <TextField
+                required
                 {...params}
                 variant="outlined"
                 label="Tags"
                 placeholder="Add some tags to your image"
+                error = {this.state.tagError.length > 0}
                 helperText={this.state.tagError}
               />
               )}

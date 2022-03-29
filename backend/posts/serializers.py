@@ -35,6 +35,8 @@ class PostSerializer(ModelSerializer):
         ]
 
 class CommentSerializer(ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
     class Meta:
         model = Comment
         fields = [
