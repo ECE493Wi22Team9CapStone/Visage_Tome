@@ -166,7 +166,8 @@ class PostDetailPage extends React.Component {
       this.setState({
         isLoggedIn: localStorage.getItem('token') != null,
         // darken the like button when user logouts
-        liked: localStorage.getItem('token') == null ? false : this.state.post.liked
+        liked: localStorage.getItem('token') == null ? false : this.state.post.liked,
+        isAdmin: localStorage.getItem('admin') === 'true'
       });
     });
   }
@@ -180,7 +181,7 @@ class PostDetailPage extends React.Component {
         }
       })
         .then(res => {
-          if (res.status === 200) {
+          if (res.status === 200 && res.data.liked) {
             this.setState({
               liked: res.data.liked
             });
