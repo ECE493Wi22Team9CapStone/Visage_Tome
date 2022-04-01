@@ -54,7 +54,7 @@ class HomePage extends React.Component {
     .then(res => {
       this.setState({
         posts: res.data.posts,
-        totalPages: res.data.count
+        totalPages: res.data.pages
       })
     })
     .catch(err => {
