@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, exceptions
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.authentication import TokenAuthentication
 
 import uuid
@@ -43,11 +43,36 @@ class PostListView(ListCreateAPIView):
         return super().list(request, *args, **kwargs)
 
     def post(self, request):
-        post_id = uuid.uuid4()
-        return PostDetailView().post(request, post_id)
+        """
+        ## Description:
+        create a new post
+        ## Responses:
+        **200**: for successful POST request, the post JSON is returned <br>
+        **400**: if the payload failed the serializer check
+        """
+        if "images" not in request.data:
+            return Response("Post does not include 'images' field", status=status.HTTP_400_BAD_REQUEST)
+        serializer = PostSerializer(data=request.data)
+        if serializer.is_valid():
+            post = serializer.save()
+            for image in request.data.getlist("images"):
+                Image.objects.create(post=post, image=image)
+            settings = EditableSetting.load()
+            try:
+                # TODO: add condition for registered user
+                post.date_expiry = post.date_posted + timedelta(days=settings.guest_post_lifespan)
+            except EditableSetting.DoesNotExist:
+                post.date_expiry = post.date_posted + timedelta(days=7)
+            post.save()
+
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PostDetailView(APIView):
     serializer_class = PostSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, post_id):
         """
@@ -64,38 +89,6 @@ class PostDetailView(APIView):
         except Post.DoesNotExist:
             return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
 
-    def post(self, request, post_id):
-        """
-        ## Description:
-        create a new post with the id post_id
-        ## Responses:
-        **200**: for successful POST request, the post JSON is returned <br>
-        **400**: if the payload failed the serializer check <br>
-        **409**: if the post_id already exist
-        """
-        try:
-            post = Post.objects.get(id=post_id)
-            return Response("Post id already exist", status=status.HTTP_409_CONFLICT)
-        except Post.DoesNotExist:
-            if "images" not in request.data:
-                return Response("Post does not include 'images' field", status=status.HTTP_400_BAD_REQUEST)
-            serializer = PostSerializer(data=request.data)
-            if serializer.is_valid():
-                post = serializer.save()
-                for image in request.data.getlist("images"):
-                    Image.objects.create(post=post, image=image)
-                settings = EditableSetting.load()
-                try:
-                    # TODO: add condition for registered user
-                    post.date_expiry = post.date_posted + timedelta(days=settings.guest_post_lifespan)
-                except EditableSetting.DoesNotExist:
-                    post.date_expiry = post.date_posted + timedelta(days=7)
-                post.save()
-
-                return Response(serializer.data)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def delete(self, request, post_id):
         """
         ## Description:
@@ -104,6 +97,9 @@ class PostDetailView(APIView):
         **204**: for successful DELETE request <br>
         **404**: if the post_id does not exist
         """
+        if not request.user.is_superuser:
+            return Response("Only admin can delete posts", status=status.HTTP_403_FORBIDDEN)
+
         try:
             post = Post.objects.get(id=post_id)
             post.delete()
