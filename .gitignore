@@ -1,6 +1,6 @@
 ### for backend ###
 backend/venv/
-backend/images/
+backend/media/
 **/__pycache__/
 db.sqlite3
 **/.env

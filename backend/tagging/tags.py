@@ -14,7 +14,7 @@ def tagImages():
     exts = ["*.JPG", "*.jpg"]
 
     for ext in exts:
-        pathPattern = str(PARENT_DIR) + "/images/tag_images/" + ext
+        pathPattern = str(PARENT_DIR) + "/media/tag_images/" + ext
         imgPaths = glob.glob(pathPattern)
         imagePaths.extend(imgPaths)
 
@@ -39,7 +39,7 @@ def tagImages():
         "tags": returnList
     }
 
-    files = glob.glob(str(PARENT_DIR) + "/images/tag_images/*")
+    files = glob.glob(str(PARENT_DIR) + "/media/tag_images/*")
     for f in files:
         os.remove(f)
     return result

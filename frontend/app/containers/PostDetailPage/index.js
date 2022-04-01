@@ -49,11 +49,11 @@ class PostDetailPage extends React.Component {
       deleteDialogState: "inactive",
       isAdmin: localStorage.getItem('admin') === 'true',
       commentError: "",
-      snakeBarStatus: "inactive", 
+      snackBarStatus: "inactive", 
       isLoggedIn: localStorage.getItem('token') !== null,
     }
     
-    this.snakeBarMessages = {
+    this.snackBarMessages = {
       inactive: {
         severity: "info",
         message: "",
@@ -96,7 +96,7 @@ class PostDetailPage extends React.Component {
       .catch(err => {
         if (err.response.status === 401) {
           this.setState({
-            snakeBarStatus: "guestLikeClick"
+            snackBarStatus: "guestLikeClick"
           });
         }
       });
@@ -119,7 +119,7 @@ class PostDetailPage extends React.Component {
           this.setState({
             post: res.data,
             comment: "",
-            snakeBarStatus: "commentPosted"
+            snackBarStatus: "commentPosted"
           });
         } else {
           console.log("Failed to comment post: ", res);
@@ -131,7 +131,11 @@ class PostDetailPage extends React.Component {
   }
 
   handleDelete = () => {
-    axios.delete(`${BACKEND_URL}/posts/${this.state.postId}/`)
+    axios.delete(`${BACKEND_URL}/posts/${this.state.postId}/`, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('token')}`
+      }
+    })
       .then(res => {
         if (res.status === 204) {
           this.setState({
@@ -214,17 +218,17 @@ class PostDetailPage extends React.Component {
         </Helmet>
 
         <Snackbar
-          open={this.state.snakeBarStatus !== "inactive"}
+          open={this.state.snackBarStatus !== "inactive"}
           autoHideDuration={5000}
-          onClose={() => this.setState({snakeBarStatus: "inactive"})}
+          onClose={() => this.setState({snackBarStatus: "inactive"})}
         >
           <Alert 
-            onClose={() => this.setState({snakeBarStatus: "inactive"})} 
-            severity={this.snakeBarMessages[this.state.snakeBarStatus].severity}
+            onClose={() => this.setState({snackBarStatus: "inactive"})} 
+            severity={this.snackBarMessages[this.state.snackBarStatus].severity}
             sx={{ width: '100%' }}
             variant="filled"
           >
-            {this.snakeBarMessages[this.state.snakeBarStatus].message}
+            {this.snackBarMessages[this.state.snackBarStatus].message}
           </Alert>
         </Snackbar>
 
@@ -302,14 +306,30 @@ class PostDetailPage extends React.Component {
             <FormattedMessage {...messages.tags} />
           </H2>
 
+
           <Stack 
             direction={"row"} 
             spacing={2}
-          >
+            >
             {this.state.post.tags.split(",").map((tag) => (
               <Chip key={tag} color="primary" label={tag} />
-            ))}
+              ))}
           </Stack>
+
+          {this.state.post.video.length > 0 && (
+            <>
+              <H1>
+                <FormattedMessage {...messages.video} />
+              </H1>
+
+              <video
+                src={`${BACKEND_URL + this.state.post.video}`}
+                type="video/mp4" 
+                controls 
+              />
+            </>
+          )}
+          
           <H1>
             <FormattedMessage {...messages.detail} />
           </H1>

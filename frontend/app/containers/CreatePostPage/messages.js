@@ -17,7 +17,7 @@ export default defineMessages({
     },
     upload: {
       id: `${scope}.upload`,
-      defaultMessage: 'Upload Image(s)',
+      defaultMessage: 'Upload Image(s) or Video',
     },
     tagImages: {
       id: `${scope}.tagImages`,
@@ -30,5 +30,13 @@ export default defineMessages({
     taggingFailed: {
       id: `${scope}.taggingFailed`,
       defaultMessage: 'Failed to tag images, please try again'
+    },
+    deleteVideo: {
+      id: `${scope}.deleteVideo`,
+      defaultMessage: 'Delete Video',
+    },
+    maximumUpload: {
+      id: `${scope}.maximumUpload`,
+      defaultMessage: 'You can upload a maximum of 6 images and 1 video per post',
     }
 });

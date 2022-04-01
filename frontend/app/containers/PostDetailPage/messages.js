@@ -11,6 +11,10 @@ export default defineMessages({
     id: `${scope}.images`,
     defaultMessage: 'Post Images',
   },
+  video: {
+    id: `${scope}.video`,
+    defaultMessage: 'Post Video',
+  },
   tags: {
     id: `${scope}.tags`,
     defaultMessage: 'Image Tags',

@@ -12,6 +12,7 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Typography from '@mui/material/Typography';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CircularProgress from '@mui/material/CircularProgress';
 import StyleIcon from '@mui/icons-material/Style';
@@ -32,15 +33,17 @@ class CreatePostPage extends React.Component {
       postDescription: "",
       tags: [],
       images: [],
+      video: null,
       isCreated: false,
       displayError: "",
       titleError: "",
       tagError: "",
+      imgError: "",
       tagging: "inactive",
-      snakeBarStatus: "inactive"
+      snackBarStatus: "inactive"
     }
 
-    this.snakeBarMessages = {
+    this.snackBarMessages = {
       inactive: {
         severity: "info",
         message: "",
@@ -52,19 +55,44 @@ class CreatePostPage extends React.Component {
       taggingFailed: {
         severity: "error",
         message: <FormattedMessage {...messages.taggingFailed} />,
+      },
+      maximumUpload: {
+        severity: "error",
+        message: <FormattedMessage {...messages.maximumUpload} />,
       }
     }
 
-    this.onImageUpload = this.onImageUpload.bind(this);
+    this.onUpload = this.onUpload.bind(this);
     this.onImageRemove = this.onImageRemove.bind(this);
     this.onCreateClick = this.onCreateClick.bind(this);
     this.onTagClick = this.onTagClick.bind(this);
   }
 
-  onImageUpload = (event) => {
-    this.setState({
-      images: [...this.state.images, ...event.target.files]
-    });
+  onUpload = (event) => {
+    const ext = event.target.files[0].name.split('.').pop();
+
+    if (ext === "jpg" || ext === "jpeg" || ext === "png") {
+      if (this.state.images.length < 6) {
+        this.setState({
+          images: [...this.state.images, ...event.target.files],
+          imgError: ""
+        });
+      } else {
+        this.setState({
+          snackBarStatus: "maximumUpload"
+        });
+      }
+    } else if (ext === "mp4") {
+      if (this.state.video === null) {
+        this.setState({
+          video: event.target.files[0]
+        });
+      } else {
+        this.setState({
+          snackBarStatus: "maximumUpload"
+        });
+      }
+    }
   }
 
   onImageRemove = (item) => {
@@ -95,14 +123,14 @@ class CreatePostPage extends React.Component {
           this.setState({
             tags: res.data.tags,
             tagging: "inactive",
-            snakeBarStatus: "taggingSuccess"
+            snackBarStatus: "taggingSuccess"
           });
         }
       })
       .catch(err => {
         this.setState({
           tagging: "inactive",
-          snakeBarStatus: "taggingFailed"
+          snackBarStatus: "taggingFailed"
         });
       });
     }
@@ -140,6 +168,9 @@ class CreatePostPage extends React.Component {
       formData.append('tags', this.state.tags.join(','));
       for (let i = 0; i < this.state.images.length; i++) {
         formData.append('images', this.state.images[i]);
+      }
+      if (this.state.video !== null) {
+        formData.append('video', this.state.video);
       }
 
       let backendUrl = `${BACKEND_URL}/posts/`;
@@ -180,17 +211,17 @@ class CreatePostPage extends React.Component {
           </H1>
           
           <Snackbar
-            open={this.state.snakeBarStatus !== "inactive"}
+            open={this.state.snackBarStatus !== "inactive"}
             autoHideDuration={5000}
-            onClose={() => this.setState({snakeBarStatus: "inactive"})}
+            onClose={() => this.setState({snackBarStatus: "inactive"})}
           >
             <Alert 
-              onClose={() => this.setState({snakeBarStatus: "inactive"})} 
-              severity={this.snakeBarMessages[this.state.snakeBarStatus].severity}
+              onClose={() => this.setState({snackBarStatus: "inactive"})} 
+              severity={this.snackBarMessages[this.state.snackBarStatus].severity}
               sx={{ width: '100%' }}
               variant="filled"
             >
-              {this.snakeBarMessages[this.state.snakeBarStatus].message}
+              {this.snackBarMessages[this.state.snackBarStatus].message}
             </Alert>
           </Snackbar>
 
@@ -252,6 +283,25 @@ class CreatePostPage extends React.Component {
               ))}
             </ImageList>
             
+            {this.state.video != null && (
+              <>
+                <video
+                  src={`${URL.createObjectURL(this.state.video)}`}
+                  type="video/mp4" 
+                  controls 
+                />
+
+                <Button
+                  variant="contained"
+                  component="label"
+                  color="error"
+                  onClick={() => this.setState({video: null})}
+                >
+                  <FormattedMessage {...messages.deleteVideo} />
+                </Button>
+              </>
+            )}
+
             <Stack
               spacing={1}
               direction="row"
@@ -270,8 +320,8 @@ class CreatePostPage extends React.Component {
                 <FormattedMessage {...messages.upload} />
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={this.onImageUpload}
+                  accept="image/jpg, image/jpeg, image/png, video/mp4"
+                  onChange={this.onUpload}
                   hidden
                 />
               </Button>
@@ -289,6 +339,7 @@ class CreatePostPage extends React.Component {
                 {this.state.tagging === "active" ? <CircularProgress size={20} /> : <FormattedMessage {...messages.tagImages} />}
               </Button>
             </Stack>
+            <Typography color="red">{this.state.imgError}</Typography>
 
             <Autocomplete
               multiple

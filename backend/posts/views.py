@@ -1,6 +1,6 @@
 from datetime import timedelta
 from visage_tome.models import EditableSetting
-from .models import Post, Image, Like, Comment
+from .models import Post, Image, Video, Like, Comment
 from .serializers import CommentSerializer, PostSerializer
 from .pagination import PostPagination
 
@@ -57,6 +57,8 @@ class PostListView(ListCreateAPIView):
             post = serializer.save()
             for image in request.data.getlist("images"):
                 Image.objects.create(post=post, image=image)
+            if "video" in request.data:
+                Video.objects.create(post=post, video=request.data["video"])
             settings = EditableSetting.load()
             try:
                 # TODO: add condition for registered user

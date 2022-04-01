@@ -1,11 +1,16 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 from posts.models import *
 from users.models import User
+import shutil, tempfile
 
+# making a temporary directory for the images
+MEDIA_ROOT = tempfile.mkdtemp()
+
+@override_settings(MEDIA_ROOT=MEDIA_ROOT)
 class PostTestCases(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -375,3 +380,6 @@ class PostTestCases(TestCase):
         }
         response = self.client.post('/posts/' + self.post.id + "/comment/", payload)
         self.assertEqual(response.status_code, 401)
+    
+    def tearDown(self):
+        shutil.rmtree(MEDIA_ROOT)

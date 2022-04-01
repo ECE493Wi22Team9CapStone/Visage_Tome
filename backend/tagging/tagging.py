@@ -10,7 +10,7 @@ import time
 import os.path
 import tensorflow as tf
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2,3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
