@@ -6,6 +6,7 @@ from .pagination import PostPagination
 
 from django.utils import timezone
 from django.db.models import Q
+from django.contrib.auth.models import AnonymousUser
 
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, ListCreateAPIView
@@ -61,8 +62,11 @@ class PostListView(ListCreateAPIView):
                 Video.objects.create(post=post, video=request.data["video"])
             settings = EditableSetting.load()
             try:
-                # TODO: add condition for registered user
-                post.date_expiry = post.date_posted + timedelta(days=settings.guest_post_lifespan)
+                print(request.user)
+                if isinstance(request.user, AnonymousUser):
+                    post.date_expiry = post.date_posted + timedelta(days=settings.guest_post_lifespan)
+                else:
+                    post.date_expiry = post.date_posted + timedelta(days=settings.user_post_lifespan)
             except EditableSetting.DoesNotExist:
                 post.date_expiry = post.date_posted + timedelta(days=7)
             post.save()

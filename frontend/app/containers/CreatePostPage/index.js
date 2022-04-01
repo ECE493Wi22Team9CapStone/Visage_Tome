@@ -174,11 +174,15 @@ class CreatePostPage extends React.Component {
       }
 
       let backendUrl = `${BACKEND_URL}/posts/`;
-
+      
+      let headers = {
+        'Content-Type': 'multipart/form-data'
+      };
+      if (localStorage.getItem('token') != null) {
+        headers['Authorization'] = `Token ${localStorage.getItem('token')}`;
+      }
       axios.post(backendUrl, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        }
+        headers: headers
       })
       .then(res => {
         if (res.status === 200) {
