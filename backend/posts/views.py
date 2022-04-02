@@ -1,3 +1,15 @@
+"""
+    This file contains all the endpoint logic for the posts app
+    Related Functional Requirements:
+    * FR3 - Create.Post
+    * FR5 - Remove.Post
+    * FR8 - View.Posts
+    * FR9 - Search.Post
+    * FR11 - Like.Posts
+    * FR12 - Comment.Posts
+    individual relation is also specified in the comment for each function
+"""
+
 from datetime import timedelta
 from visage_tome.models import EditableSetting
 from .models import Post, Image, Video, Like, Comment
@@ -34,6 +46,7 @@ class PostListView(ListCreateAPIView):
 
         return queryset
 
+    # FR8 - View.Posts, FR9 - Search.Post
     def get(self, request, *args, **kwargs):
         """
         ## Description:
@@ -43,6 +56,7 @@ class PostListView(ListCreateAPIView):
         """
         return super().list(request, *args, **kwargs)
 
+    # FR3 - Create.Post
     def post(self, request):
         """
         ## Description:
@@ -62,7 +76,6 @@ class PostListView(ListCreateAPIView):
                 Video.objects.create(post=post, video=request.data["video"])
             settings = EditableSetting.load()
             try:
-                print(request.user)
                 if isinstance(request.user, AnonymousUser):
                     post.date_expiry = post.date_posted + timedelta(days=settings.guest_post_lifespan)
                 else:
@@ -80,6 +93,7 @@ class PostDetailView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    # FR5 - Remove.Post, FR11 - Like.Posts, FR12 - Comment.Posts
     def get(self, request, post_id):
         """
         ## Description:
@@ -95,6 +109,7 @@ class PostDetailView(APIView):
         except Post.DoesNotExist:
             return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
 
+    # FR5 - Remove.Post
     def delete(self, request, post_id):
         """
         ## Description:
@@ -117,6 +132,7 @@ class PostLikeView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    # FR11 - Like.Posts
     def get(self, request, post_id):
         """
         ## Description:
@@ -133,6 +149,7 @@ class PostLikeView(APIView):
         except Post.DoesNotExist:
             return Response("Post id does not exist", status=status.HTTP_404_NOT_FOUND)
 
+    # FR11 - Like.Posts
     def post(self, request, post_id):
         """
         ## Description:
@@ -165,6 +182,7 @@ class PostCommentView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CommentSerializer
 
+    # FR12 - Comment.Posts
     def post(self, request, post_id):
         """
         ## Description:

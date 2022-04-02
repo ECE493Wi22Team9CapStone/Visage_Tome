@@ -1,3 +1,10 @@
+"""
+    This file contains the pagination logic for returning list of posts
+    Related Functional Requirements:
+    * FR8 - View.Posts
+    * FR9 - Search.Post
+"""
+
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 

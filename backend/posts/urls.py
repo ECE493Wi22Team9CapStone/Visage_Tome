@@ -1,3 +1,9 @@
+"""
+    This file contains all the endpoint specification for the posts app
+    Related Functional Requirements: 
+    * same as posts/views.py
+"""
+
 from django.urls import path
 from .views import *
 

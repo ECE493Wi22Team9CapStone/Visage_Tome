@@ -1,16 +1,14 @@
-from django.shortcuts import render
-from datetime import timedelta
-from visage_tome.models import EditableSetting
-
-from django.utils import timezone
-from django.db.models import Q
+"""
+    This file contains all the endpoint logic for the tagging app
+    Related Functional Requirements:
+    * FR4 - Photo.Auto.Tagging
+"""
 
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
-from rest_framework import status, permissions, exceptions
+from rest_framework import status
 from .models import TagImage
-from .tagging import AITagger
+from .AITagger import AITagger
 
 tagger = AITagger()
 

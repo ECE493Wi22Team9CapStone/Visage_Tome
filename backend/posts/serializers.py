@@ -1,3 +1,9 @@
+"""
+    This file contains the model serializers for the posts app
+    Related Functional Requirements:
+    * Same as posts/models.py
+"""
+
 from datetime import timedelta
 from .models import Post, Image, Video, Comment, Like
 from rest_framework import serializers
