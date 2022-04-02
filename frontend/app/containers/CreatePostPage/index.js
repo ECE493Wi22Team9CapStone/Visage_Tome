@@ -121,7 +121,7 @@ class CreatePostPage extends React.Component {
       .then(res => {
         if (res.status === 200) {
           this.setState({
-            tags: res.data.tags,
+            tags: [...this.state.tags, ...res.data.tags],
             tagging: "inactive",
             snackBarStatus: "taggingSuccess"
           });
@@ -349,7 +349,6 @@ class CreatePostPage extends React.Component {
               multiple
               freeSolo
               options={[]}
-              noOptionsText="Press Enter to add"
               id="post-tags"
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
@@ -362,7 +361,7 @@ class CreatePostPage extends React.Component {
                 {...params}
                 variant="outlined"
                 label="Tags"
-                placeholder="Add some tags to your image"
+                placeholder="Add some tags to your image, press ENTER to add"
                 error = {this.state.tagError.length > 0}
                 helperText={this.state.tagError}
               />

@@ -1,142 +1,130 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from logging import exception
-
 import math
 import os
-import time
+import glob
+from pathlib import Path
 
-import os.path
 import tensorflow as tf
 
+# make sure tensorflow is using GPU (if available)
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+MODEL_DIR = os.path.dirname(os.path.abspath(__file__)) + '/pretrain_open_images'
+PARENT_DIR = Path(__file__).parent.parent
 
-flags = tf.compat.v1.app.flags
-FLAGS = flags.FLAGS
+# using the Singleton design pattern 
+# from https://medium.com/techtofreedom/3-levels-of-understanding-the-singleton-pattern-in-python-4bf429a10438
+class Singleton():
+    _instance = None
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__)) + '/pretrain_open_images'
+    # Making the class Singleton
+    # make sure there is only one instance of the class
+    def __new__(cls, *args, **kwargs):
+        if Singleton._instance is None:
+            Singleton._instance = object.__new__(cls, *args, **kwargs)
+        return Singleton._instance
 
-flags.DEFINE_string('labelmap', BASE_DIR + '/classes-trainable.txt',
-                    'Labels, one per line.')
-
-# Total 5000 labels (classes/categories)
-flags.DEFINE_string('dict', BASE_DIR + '/class-descriptions.csv',
-                    'Descriptive string for each label.')
-
-flags.DEFINE_string('checkpoint_path', BASE_DIR + '/oidv2-resnet_v1_101.ckpt',
-                    'Path to checkpoint file.')
-
-# After tagging, each image will get a list like this:
-# [(label_1, probability_of_label_1),...,(label_5000, probability_of_label_5000)]
-
-# Config to return top-k labels with highest probabilities
-flags.DEFINE_integer('top_k', 10, 'Maximum number of results to show.')
-
-# Only return labels with probability > score_threshold
-flags.DEFINE_float('score_threshold', 0.1, 'Score threshold.')
-
-
-class AITagger:
-
+class AITagger(Singleton):
     def __init__(self):
-        return
+        self.label_path = MODEL_DIR + '/classes-trainable.txt'
+        self.description_path = MODEL_DIR + '/class-descriptions.csv'
+        self.checkpoint_path = MODEL_DIR + '/oidv2-resnet_v1_101.ckpt'
+        self.batch_size = 10
+        # how many labels to return for one image
+        self.top_results = 3
 
-    label_map = None
-    label_dict = None
-    label_5000_list = []
+        # load the labels
+        self.labels = []
+        self.get_labels()
 
-    flags = FLAGS
+    def get_labels(self):
+        """
+        we have ~20k label_id-label pairs in class description,
+        but only 5k label_id in classes-trainable.txt that are trained
+        Have to do a mapping to extract the labels that can be used
+        """
+        label_ids = []
+        label_descriptions = {}
+        for label_id in tf.compat.v1.gfile.GFile(self.label_path):
+            label_ids.append(label_id.strip())
+        for line in tf.compat.v1.gfile.GFile(self.description_path):
+            string = [line.strip(' "\n') for line in line.split(',', 1)]
+            label_descriptions[string[0]] = string[1]
+        for label_id in label_ids:
+            self.labels.append(label_descriptions[label_id])
 
-    @staticmethod
-    def init_data():
-        if AITagger.label_map is None:
-            AITagger.label_map = [line.rstrip() for line in tf.compat.v1.gfile.GFile(AITagger.flags.labelmap)]
-        if AITagger.label_dict is None:
-            AITagger.label_dict = {}
-            for line in tf.compat.v1.gfile.GFile(AITagger.flags.dict):
-                words = [word.strip(' "\n') for word in line.split(',', 1)]
-                AITagger.label_dict[words[0]] = words[1]
+    def predict(self, image_paths):
+        prediction_result = []
 
-            for label_id in AITagger.label_map:
-                AITagger.label_5000_list.append(AITagger.label_dict[label_id])
+        # https://www.tensorflow.org/api_docs/python/tf/compat/v1/train/import_meta_graph
+        # creating a saver and loading the model
+        with tf.compat.v1.Session() as session:
+            saver = tf.compat.v1.train.import_meta_graph(self.checkpoint_path + '.meta')
+            saver.restore(session, self.checkpoint_path)
 
-    @staticmethod
-    def make_batch_predictions(images_list_urls, batch_size=1000):
+            input = tf.compat.v1.get_default_graph().get_tensor_by_name('input_values:0')
+            predictions = tf.compat.v1.get_default_graph().get_tensor_by_name('multi_predictions:0')
 
-        total_images = len(images_list_urls)
+            for image in image_paths:
+                if not os.path.isfile(image):
+                    continue
 
-        num_batch = math.floor(total_images / batch_size)
-        if total_images % batch_size > 0:
-            num_batch += 1
+                try:
+                    compressed_image = tf.compat.v1.gfile.FastGFile(image, 'rb').read()
+                    predictions_eval = session.run(
+                        predictions, feed_dict={
+                            input: [compressed_image]
+                        }
+                    )
 
-        # result = {image_name:[prob1, prob2,...,prob5000], ...]}
-        result = {}
+                    # map the probabilities to labels
+                    result_map = dict(zip(self.labels, predictions_eval))
+                    # return the top results specified by self.top_results
+                    best_labels = sorted(result_map, key=result_map.get, reverse=True)[:self.top_results]
+                    prediction_result.extend(best_labels)
+                except Exception as error:
+                    print('Error occured when making prediction to %s: %s', image, error)
+        
+        # eliminate potential duplicates before returning
+        return list(set(prediction_result))
 
-        for index in range(int(num_batch)):
+    def tag_images(self, image_paths):
+        images_len = len(image_paths)
+        batches = math.ceil(images_len / self.batch_size)
 
-            start = index * batch_size
-            stop = start + batch_size
+        predictions = []
 
-            if stop > total_images:
-                stop = total_images
+        # split the tagging process into batches for memory management
+        for index in range(batches):
+            start_idx = index * self.batch_size
+            end_idx = (index + 1) * self.batch_size
+            end_idx = end_idx if end_idx <= images_len else images_len
 
-            # Get batch of images
-            image_list_files = images_list_urls[start:stop]
+            # Get images for the current batch
+            image_batch = image_paths[start_idx:end_idx]
 
-            start_tagging_time = time.time()
-            batch_predictions_result = AITagger.make_predictions(image_list_files)
-            elapsed_time = time.time() - start_tagging_time
+            predictions.extend(self.predict(image_batch))
 
-            tagged_image_count = batch_size
-            if batch_size > total_images:
-                tagged_image_count = total_images
+        return predictions
+    
+    def tag(self):
+        imagePaths = []
 
-            print('Finish tagging {0} images in batch {1}/{2} with {3} seconds'.format(tagged_image_count, (index + 1),
-                                                                                       int(num_batch), elapsed_time))
-            result.update(batch_predictions_result)
+        exts = ["*.jpg", "*.png"]
+
+        # the view will upload all images to /media/tag_images/ folder
+        for ext in exts:
+            images = str(PARENT_DIR) + "/media/tag_images/" + ext
+            imagePaths.extend(glob.glob(images))
+
+        print(f"Found {len(imagePaths)} images to tag, begin tagging...")
+        result = {
+            "tags": self.tag_images(imagePaths)
+        }
+
+        # remove the images from the server before returning
+        files = glob.glob(str(PARENT_DIR) + "/media/tag_images/*")
+        for f in files:
+            os.remove(f)
 
         return result
-
-    @staticmethod
-    def make_predictions(image_list_files):
-
-        predictions_dict = {}
-
-        g = tf.Graph()
-        with g.as_default():
-            with tf.compat.v1.Session() as sess:
-                saver = tf.compat.v1.train.import_meta_graph(AITagger.flags.checkpoint_path + '.meta')
-                saver.restore(sess, AITagger.flags.checkpoint_path)
-
-                input_values = g.get_tensor_by_name('input_values:0')
-                predictions = g.get_tensor_by_name('multi_predictions:0')
-
-                for image_filename in image_list_files:
-
-                    if os.path.isfile(image_filename) is False:
-                        continue
-
-                    try:
-                        compressed_image = tf.compat.v1.gfile.FastGFile(image_filename, 'rb').read()
-                        predictions_eval = sess.run(
-                            predictions, feed_dict={
-                                input_values: [compressed_image]
-                            })
-                        predictions_dict[image_filename] = predictions_eval
-
-                    except KeyboardInterrupt:
-                        raise
-                    except Exception as E:
-                        print('Error with image: "%s"\n' % image_filename)
-                        print(E)
-
-        return predictions_dict
-
-    @staticmethod
-    def do_tagging_process(images):
-        AITagger.init_data()
-        predict_result = AITagger.make_batch_predictions(images)
-        return predict_result
+    

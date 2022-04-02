@@ -10,9 +10,9 @@ from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, exceptions
 from .models import TagImage
-from .tags import tagImages
+from .tagging import AITagger
 
-import uuid
+tagger = AITagger()
 
 class TaggingView(APIView):
     def post(self, request):
@@ -22,7 +22,7 @@ class TaggingView(APIView):
         for image in request.data.getlist("images"):
             TagImage.objects.create(image=image)
         # Call the AI to tag the images
-        tagList = tagImages()
+        tagList = tagger.tag()
         # Delete the images objects from database
         TagImage.objects.all().delete()
         return Response(tagList)
