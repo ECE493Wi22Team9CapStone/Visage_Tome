@@ -1,3 +1,11 @@
+"""
+    This file contains the models for the users app
+    Related Functional Requirements:
+    * FR1 - User.Registration
+    * FR2 - User.Login
+    * FR10 - Ban.User
+"""
+
 import uuid
 
 from django.db import models

@@ -1,3 +1,8 @@
+"""
+    This file contains all the unit tests for the posts app
+    Related Functional Requirements: None
+"""
+
 from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token

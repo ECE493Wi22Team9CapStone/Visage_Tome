@@ -1,3 +1,10 @@
+"""
+    This file contains all the endpoint logic for the Visage Tome app
+    Related Functional Requirements:
+    * FR6 - Post.LifeSpan
+    * FR7 - Change.LifeSpan
+"""
+
 from rest_framework.response import Response
 from rest_framework import status
 

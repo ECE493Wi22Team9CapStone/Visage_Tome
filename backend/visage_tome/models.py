@@ -1,5 +1,13 @@
+"""
+    File is contains the model for the main Visage Tome app
+    Related Functional Requirements:
+    * FR6 - Post.LifeSpan
+    * FR7 - Change.LifeSpan
+"""
+
 from django.db import models
 
+# Singleton model for Django
 # https://www.rootstrap.com/blog/simple-dynamic-settings-for-django/
 class Singleton(models.Model):
     class Meta:
