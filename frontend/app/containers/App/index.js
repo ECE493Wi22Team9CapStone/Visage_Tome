@@ -19,8 +19,6 @@ import AdminPage from 'containers/AdminPage/Loadable'
 import Header from 'components/Header';
 import Footer from 'components/Footer';
 
-import GlobalStyle from '../../global-styles';
-
 const AppWrapper = styled.div`
   max-width: calc(768px + 16px * 2);
   margin: 0 auto;
@@ -50,7 +48,6 @@ export default function App() {
         <Route path="" component={NotFoundPage} />
       </Switch>
       <Footer />
-      <GlobalStyle />
     </AppWrapper>
   );
 }

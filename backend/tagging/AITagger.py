@@ -44,9 +44,9 @@ class AITagger(Singleton):
         """
         label_ids = []
         label_descriptions = {}
-        for label_id in tf.compat.v1.gfile.GFile(self.label_path):
+        for label_id in tf.io.gfile.GFile(self.label_path):
             label_ids.append(label_id.strip())
-        for line in tf.compat.v1.gfile.GFile(self.description_path):
+        for line in tf.io.gfile.GFile(self.description_path):
             string = [line.strip(' "\n') for line in line.split(',', 1)]
             label_descriptions[string[0]] = string[1]
         for label_id in label_ids:
@@ -69,15 +69,11 @@ class AITagger(Singleton):
                     continue
 
                 try:
-                    compressed_image = tf.compat.v1.gfile.FastGFile(image, 'rb').read()
-                    predictions_eval = session.run(
-                        predictions, feed_dict={
-                            input: [compressed_image]
-                        }
-                    )
+                    compressed_image = tf.io.gfile.GFile(image, 'rb').read()
+                    result = session.run(predictions, feed_dict={input: [compressed_image]})
 
                     # map the probabilities to labels
-                    result_map = dict(zip(self.labels, predictions_eval))
+                    result_map = dict(zip(self.labels, result))
                     # return the top results specified by self.top_results
                     best_labels = sorted(result_map, key=result_map.get, reverse=True)[:self.top_results]
                     prediction_result.extend(best_labels)

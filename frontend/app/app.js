@@ -25,7 +25,6 @@ import LanguageProvider from 'containers/LanguageProvider';
 
 // Load the favicon and the .htaccess file
 import '!file-loader?name=[name].[ext]!./images/favicon.ico';
-import 'file-loader?name=.htaccess!./.htaccess'; // eslint-disable-line import/extensions
 
 import configureStore from './configureStore';
 
@@ -59,34 +58,7 @@ const render = messages => {
   );
 };
 
-if (module.hot) {
-  // Hot reloadable React components and translation json files
-  // modules.hot.accept does not accept dynamic dependencies,
-  // have to be constants at compile-time
-  module.hot.accept(['./i18n', 'containers/App'], () => {
-    ReactDOM.unmountComponentAtNode(MOUNT_NODE);
-    render(translationMessages);
-  });
-}
-
-// Chunked polyfill for browsers without Intl support
-if (!window.Intl) {
-  new Promise(resolve => {
-    resolve(import('intl'));
-  })
-    .then(() =>
-      Promise.all([
-        import('intl/locale-data/jsonp/en.js'),
-        import('intl/locale-data/jsonp/de.js'),
-      ]),
-    ) // eslint-disable-line prettier/prettier
-    .then(() => render(translationMessages))
-    .catch(err => {
-      throw err;
-    });
-} else {
-  render(translationMessages);
-}
+render(translationMessages);
 
 // Install ServiceWorker and AppCache in the end since
 // it's not most important operation and if main code fails,
