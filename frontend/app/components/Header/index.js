@@ -1,3 +1,12 @@
+/**
+ * Header
+ *
+ * This component is the header for the application.
+ * Related Function Requirements:
+ *  FR1 - User.Registeration
+ *  FR2 - User.Login
+ */
+
 // react modules components
 import React, {useRef, useState} from 'react';
 import axios from "axios";

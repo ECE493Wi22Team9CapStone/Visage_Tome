@@ -1,3 +1,13 @@
+/**
+ * CreatePostPage
+ *
+ * This component let user create a new post
+ * Related Function Requirements:
+ *  FR3 - Create.Post
+ *  FR4 - Image.AutoTagging
+ *  FR5 - Delete.Post
+ */
+
 import React from 'react';
 import axios from 'axios';
 import { Helmet } from 'react-helmet';
