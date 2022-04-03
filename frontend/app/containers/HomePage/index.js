@@ -26,6 +26,8 @@ import LoadingIndicator from 'components/LoadingIndicator';
 import axios from 'axios';
 
 import { BACKEND_URL } from '../../utils/constants';
+import { FormattedMessage } from 'react-intl';
+import messages from './messages';
 
 class HomePage extends React.Component {
   constructor(props) {
@@ -54,7 +56,7 @@ class HomePage extends React.Component {
     .then(res => {
       this.setState({
         posts: res.data.posts,
-        totalPages: res.data.count
+        totalPages: res.data.pages
       })
     })
     .catch(err => {
@@ -113,7 +115,7 @@ class HomePage extends React.Component {
     } else if (this.state.posts === null) {
       postList = <center><LoadingIndicator /></center>
     } else {
-      postList = <p><center>No posts found</center></p>
+      postList = <center> <FormattedMessage {...messages.noPostsFound} /> </center>
     }
 
     return (
@@ -122,7 +124,7 @@ class HomePage extends React.Component {
           <title>Home Page</title>
           <meta
             name="description"
-            content="A React.js Boilerplate application homepage"
+            content="ECE 493 Capstone Project - Visage Tome"
           />
         </Helmet>
         

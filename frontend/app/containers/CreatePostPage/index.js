@@ -10,6 +10,14 @@ import Chip from '@mui/material/Chip';
 import Autocomplete from '@mui/material/Autocomplete';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import Typography from '@mui/material/Typography';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CircularProgress from '@mui/material/CircularProgress';
+import StyleIcon from '@mui/icons-material/Style';
+import CancelIcon from '@mui/icons-material/Cancel';
+import SaveIcon from '@mui/icons-material/Save';
 
 import H1 from 'components/H1';
 import messages from './messages';
@@ -25,19 +33,66 @@ class CreatePostPage extends React.Component {
       postDescription: "",
       tags: [],
       images: [],
+      video: null,
       isCreated: false,
+      displayError: "",
+      titleError: "",
+      tagError: "",
+      imgError: "",
+      tagging: "inactive",
+      snackBarStatus: "inactive"
     }
 
-    this.onImageUpload = this.onImageUpload.bind(this);
+    this.snackBarMessages = {
+      inactive: {
+        severity: "info",
+        message: "",
+      },
+      taggingSuccess: {
+        severity: "success",
+        message: <FormattedMessage {...messages.taggingSuccess} />,
+      },
+      taggingFailed: {
+        severity: "error",
+        message: <FormattedMessage {...messages.taggingFailed} />,
+      },
+      maximumUpload: {
+        severity: "error",
+        message: <FormattedMessage {...messages.maximumUpload} />,
+      }
+    }
+
+    this.onUpload = this.onUpload.bind(this);
     this.onImageRemove = this.onImageRemove.bind(this);
     this.onCreateClick = this.onCreateClick.bind(this);
     this.onTagClick = this.onTagClick.bind(this);
   }
 
-  onImageUpload = (event) => {
-    this.setState({
-      images: [...this.state.images, ...event.target.files]
-    });
+  onUpload = (event) => {
+    const ext = event.target.files[0].name.split('.').pop();
+
+    if (ext === "jpg" || ext === "jpeg" || ext === "png") {
+      if (this.state.images.length < 6) {
+        this.setState({
+          images: [...this.state.images, ...event.target.files],
+          imgError: ""
+        });
+      } else {
+        this.setState({
+          snackBarStatus: "maximumUpload"
+        });
+      }
+    } else if (ext === "mp4") {
+      if (this.state.video === null) {
+        this.setState({
+          video: event.target.files[0]
+        });
+      } else {
+        this.setState({
+          snackBarStatus: "maximumUpload"
+        });
+      }
+    }
   }
 
   onImageRemove = (item) => {
@@ -45,60 +100,101 @@ class CreatePostPage extends React.Component {
       images: this.state.images.filter(image => image !== item)
     });
   }
+
   onTagClick = () => {
-    let formData = new FormData();
-    for (let i = 0; i < this.state.images.length; i++) {
-      formData.append('images', this.state.images[i]);
-    }
-
-    let backendUrl = `${BACKEND_URL}/tagging/`;
-
-    axios.post(backendUrl, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    if (this.state.images.length != 0) {
+      let formData = new FormData();
+      for (let i = 0; i < this.state.images.length; i++) {
+        formData.append('images', this.state.images[i]);
       }
-    })
-    .then(res => {
-      if (res.status === 200) {
-        console.log(res.data);
+  
+      let backendUrl = `${BACKEND_URL}/tagging/`;
+      
+      this.setState({
+        tagging: "active"
+      });
+      axios.post(backendUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      })
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            tags: [...this.state.tags, ...res.data.tags],
+            tagging: "inactive",
+            snackBarStatus: "taggingSuccess"
+          });
+        }
+      })
+      .catch(err => {
         this.setState({
-          tags: res.data.tags
+          tagging: "inactive",
+          snackBarStatus: "taggingFailed"
         });
-      }
-    })
-    .catch(err => {
-      console.log(err);
-    });
+      });
+    }
   }
   
   
   onCreateClick = () => {
-    let formData = new FormData();
-    formData.append('display_name', this.state.displayName);
-    formData.append('title', this.state.postTitle);
-    formData.append('description', this.state.postDescription);
-    formData.append('tags', this.state.tags.join(','));
-    for (let i = 0; i < this.state.images.length; i++) {
-      formData.append('images', this.state.images[i]);
+    let fieldCheck = true;
+    if (this.state.displayName.length === 0 || !this.state.displayName.trim()) {
+      this.setState({displayError: "You need to enter a name"});
+      fieldCheck = false;
     }
 
-    let backendUrl = `${BACKEND_URL}/posts/`;
+    if (this.state.postTitle.length === 0 || !this.state.postTitle.trim()) {
+      this.setState({titleError: "You need a title"});
+      fieldCheck = false;
+    }
 
-    axios.post(backendUrl, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    if (this.state.tags.join(',').length === 0 || !this.state.tags.join(',').trim()) {
+
+      this.setState({tagError: "You need at least one tag"});
+      fieldCheck = false;
+    }
+    
+    if (this.state.images.length === 0) {
+      this.setState({imgError: "You need at least one image to create a post"});
+      fieldCheck = false;
+    }
+
+    if (fieldCheck != false) {
+      let formData = new FormData();
+      formData.append('display_name', this.state.displayName);
+      formData.append('title', this.state.postTitle);
+      formData.append('description', this.state.postDescription);
+      formData.append('tags', this.state.tags.join(','));
+      for (let i = 0; i < this.state.images.length; i++) {
+        formData.append('images', this.state.images[i]);
       }
-    })
-    .then(res => {
-      if (res.status === 200) {
-        this.setState({
-          isCreated: true
-        });
+      if (this.state.video !== null) {
+        formData.append('video', this.state.video);
       }
-    })
-    .catch(err => {
-      console.log(err);
-    });
+
+      let backendUrl = `${BACKEND_URL}/posts/`;
+      
+      let headers = {
+        'Content-Type': 'multipart/form-data'
+      };
+      if (localStorage.getItem('token') != null) {
+        headers['Authorization'] = `Token ${localStorage.getItem('token')}`;
+      }
+      axios.post(backendUrl, formData, {
+        headers: headers
+      })
+      .then(res => {
+        if (res.status === 200) {
+          this.setState({
+            isCreated: true
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+    }
   }
 
 	render() {
@@ -118,6 +214,21 @@ class CreatePostPage extends React.Component {
             <FormattedMessage {...messages.header} />
           </H1>
           
+          <Snackbar
+            open={this.state.snackBarStatus !== "inactive"}
+            autoHideDuration={5000}
+            onClose={() => this.setState({snackBarStatus: "inactive"})}
+          >
+            <Alert 
+              onClose={() => this.setState({snackBarStatus: "inactive"})} 
+              severity={this.snackBarMessages[this.state.snackBarStatus].severity}
+              sx={{ width: '100%' }}
+              variant="filled"
+            >
+              {this.snackBarMessages[this.state.snackBarStatus].message}
+            </Alert>
+          </Snackbar>
+
           <Stack
             component="form"
             sx={{
@@ -128,21 +239,27 @@ class CreatePostPage extends React.Component {
             autoComplete="off"
           >
             <TextField
+              required
               id="display-name"
               type="text"
               label="Display Name"
               variant="outlined"
               value={this.state.displayName}
-              onChange={(event) => this.setState({displayName: event.target.value})}
+              onChange={(event) => this.setState({displayName: event.target.value, displayError: ""})}
+              error = {this.state.displayError.length > 0}
+              helperText = {this.state.displayError}
             />
             
             <TextField
+              required
               id="post-title"
               type="text"
               label="Post Title"
               variant="outlined"
               value={this.state.postTitle}
-              onChange={(event) => this.setState({postTitle: event.target.value})}
+              onChange={(event) => this.setState({postTitle: event.target.value, titleError: ""})}
+              error = {this.state.titleError.length > 0}
+              helperText = {this.state.titleError}
             />
 
             <TextField
@@ -150,13 +267,13 @@ class CreatePostPage extends React.Component {
               fullWidth
               id="post-description"
               type="text"
-              label="Post Description"
+              label="Post Description (Optional)"
               variant="outlined"
               value={this.state.postDescription}
               onChange={(event) => this.setState({postDescription: event.target.value})}
             />
             
-            <ImageList variant="masonry" cols={3}>
+            <ImageList variant="masonry" cols={3} >
               {this.state.images.map((item) => (
                 <ImageListItem 
                   key={item.name}
@@ -169,33 +286,69 @@ class CreatePostPage extends React.Component {
                 </ImageListItem>
               ))}
             </ImageList>
+            
+            {this.state.video != null && (
+              <>
+                <video
+                  src={`${URL.createObjectURL(this.state.video)}`}
+                  type="video/mp4" 
+                  controls 
+                />
 
-            <Button
-              variant="contained"
-              component="label"
-            >
-              <FormattedMessage {...messages.upload} />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={this.onImageUpload}
-                hidden
-              />
-            </Button>
+                <Button
+                  variant="contained"
+                  component="label"
+                  color="error"
+                  onClick={() => this.setState({video: null})}
+                >
+                  <FormattedMessage {...messages.deleteVideo} />
+                </Button>
+              </>
+            )}
 
-            <Button
-              variant="contained"
-              component="label"
-              onClick={this.onTagClick}
+            <Stack
+              spacing={1}
+              direction="row"
+              sx={{
+                width: '100%'
+              }}
             >
-              Tag Images
-            </Button>
+              <Button
+                variant="contained"
+                component="label"
+                sx={{
+                  width: '50%'
+                }}
+                startIcon={<AddPhotoAlternateIcon />}
+              >
+                <FormattedMessage {...messages.upload} />
+                <input
+                  type="file"
+                  accept="image/jpg, image/jpeg, image/png, video/mp4"
+                  onChange={this.onUpload}
+                  hidden
+                />
+              </Button>
+
+              <Button
+                variant="contained"
+                component="label"
+                disabled={this.state.images.length == 0 || this.state.tagging == "active"}
+                onClick={this.onTagClick}
+                sx={{
+                  width: '50%'
+                }}
+                startIcon={<StyleIcon />}
+              >
+                {this.state.tagging === "active" ? <CircularProgress size={20} /> : <FormattedMessage {...messages.tagImages} />}
+              </Button>
+            </Stack>
+            <Typography color="red">{this.state.imgError}</Typography>
 
             <Autocomplete
               multiple
               freeSolo
               options={[]}
-              noOptionsText="Press Enter to add"
               id="post-tags"
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
@@ -204,14 +357,17 @@ class CreatePostPage extends React.Component {
               }
               renderInput={(params) => (
               <TextField
+                required
                 {...params}
                 variant="outlined"
                 label="Tags"
-                placeholder="Add some tags to your image"
+                placeholder="Add some tags to your image, press ENTER to add"
+                error = {this.state.tagError.length > 0}
+                helperText={this.state.tagError}
               />
               )}
               value={this.state.tags}
-              onChange={(event, value) => this.setState({tags: value})}
+              onChange={(event, value) => this.setState({tags: value, tagError: ""})}
             />
 
             <Stack 
@@ -223,10 +379,10 @@ class CreatePostPage extends React.Component {
               direction={"row"} 
               spacing={5}
             >
-              <Button variant='contained' color='error' href='/'>
+              <Button startIcon={<CancelIcon />} variant='contained' color='error' href='/'>
                 <FormattedMessage {...messages.cancel} />
               </Button>
-              <Button variant='contained' color='success' onClick={this.onCreateClick}>
+              <Button startIcon={<SaveIcon />} variant='contained' color='success' onClick={this.onCreateClick}>
                 <FormattedMessage {...messages.create} />
               </Button>
             </Stack>

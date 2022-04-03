@@ -1,3 +1,12 @@
+"""
+    This file contains all the endpoint logic for the users app
+    Related Functional Requirements:
+    * FR1 - User.Registration
+    * FR2 - User.Login
+    * FR10 - Ban.User
+    individual relation is also specified in the comment for each function
+"""
+
 import dateutil.parser
 
 from django.contrib.auth.hashers import check_password
@@ -11,15 +20,13 @@ from rest_framework.generics import ListAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework import status, permissions, exceptions
 
-import uuid
-import bcrypt
 from rest_framework.authtoken.models import Token
 
 
 class UserView(APIView):
     serializer_class = UserSerializer
 
-    # login
+    # FR2 - User.Login
     def post(self, request):
         data = request.data
 
@@ -44,6 +51,7 @@ class UserView(APIView):
         res = {"msg": "login success", "token": token.key, "admin": user.is_superuser}
         return Response(res, status=status.HTTP_200_OK)
 
+    # FR10 - Ban.User
     # only allowed to patch for banId
     def patch(self, request):
         bantime = timezone.now()
@@ -69,6 +77,7 @@ class UserSignupView(APIView):
     def get(self, request):
         return Response("wrong", status=status.HTTP_200_OK)
 
+    # FR1 - User.Registration
     def post(self, request):
         data = request.data
 

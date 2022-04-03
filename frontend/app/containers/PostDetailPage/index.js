@@ -1,4 +1,4 @@
-// react librairies
+// react module components
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { Redirect } from 'react-router-dom';
@@ -6,7 +6,7 @@ import axios from 'axios';
 import { FormattedMessage } from 'react-intl';
 import moment from 'moment';
 
-// react mui library
+// react mui components
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import TextField from '@mui/material/TextField';
@@ -21,6 +21,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import InputAdornment from '@mui/material/InputAdornment';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import CommentIcon from '@mui/icons-material/Comment';
@@ -28,12 +30,13 @@ import SendIcon from '@mui/icons-material/Send';
 import FaceIcon from '@mui/icons-material/Face';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-// custom librairies and definitions
+// custom components and definitions
 import messages from './messages';
 import H1 from 'components/H1';
 import H2 from 'components/H2';
 import LoadingIndicator from 'components/LoadingIndicator';
 import { BACKEND_URL } from 'utils/constants';
+import TimerComponent from './timer';
 
 class PostDetailPage extends React.Component {
   constructor(props) {
@@ -45,8 +48,25 @@ class PostDetailPage extends React.Component {
       comment: "",
       deleteDialogState: "inactive",
       isAdmin: localStorage.getItem('admin') === 'true',
+      commentError: "",
+      snackBarStatus: "inactive", 
+      isLoggedIn: localStorage.getItem('token') !== null,
     }
     
+    this.snackBarMessages = {
+      inactive: {
+        severity: "info",
+        message: "",
+      },
+      guestLikeClick: {
+        severity: "error",
+        message: <FormattedMessage {...messages.guestLikeClick} />,
+      },
+      commentPosted: {
+        severity: "success",
+        message: <FormattedMessage {...messages.commentPosted} />,
+      }
+    }
     this.onLikeButtonClick = this.onLikeButtonClick.bind(this);
     this.onCommentSend = this.onCommentSend.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
@@ -60,31 +80,46 @@ class PostDetailPage extends React.Component {
     if (this.state.liked) {
       return;
     }
-    axios.post(`${BACKEND_URL}/posts/${this.state.postId}/like/`)
+    axios.post(`${BACKEND_URL}/posts/${this.state.postId}/like/`, null, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('token')}`
+      }
+    })
       .then(res => {
         if (res.status === 200) {
           this.setState({
             post: res.data,
             liked: true
           });
-        } else {
-          console.log("Failed to like post: ", res);
         }
       })
       .catch(err => {
-        console.log("Failed to like post: ", err);
+        if (err.response.status === 401) {
+          this.setState({
+            snackBarStatus: "guestLikeClick"
+          });
+        }
       });
   }
 
   onCommentSend = () => {
+    if(this.state.comment.length === 0 || !this.state.comment.trim()) {
+      this.setState({commentError: "Cannot make an empty comment"});
+      return;
+    }
     axios.post(`${BACKEND_URL}/posts/${this.state.postId}/comment/`, {
       content: this.state.comment
+    }, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('token')}`
+      }
     })
       .then(res => {
         if (res.status === 200) {
           this.setState({
             post: res.data,
-            comment: ""
+            comment: "",
+            snackBarStatus: "commentPosted"
           });
         } else {
           console.log("Failed to comment post: ", res);
@@ -96,7 +131,11 @@ class PostDetailPage extends React.Component {
   }
 
   handleDelete = () => {
-    axios.delete(`${BACKEND_URL}/posts/${this.state.postId}/`)
+    axios.delete(`${BACKEND_URL}/posts/${this.state.postId}/`, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem('token')}`
+      }
+    })
       .then(res => {
         if (res.status === 204) {
           this.setState({
@@ -125,6 +164,37 @@ class PostDetailPage extends React.Component {
       .catch(err => {
         console.log("Failed to get post: ", err);
       });
+  
+    window.addEventListener('storage', () => {
+      console.log("hi");
+      this.setState({
+        isLoggedIn: localStorage.getItem('token') != null,
+        // darken the like button when user logouts
+        liked: localStorage.getItem('token') == null ? false : this.state.post.liked,
+        isAdmin: localStorage.getItem('admin') === 'true'
+      });
+    });
+  }
+
+  componentDidUpdate() {
+    // check whether the login user have already liked this post
+    if (this.state.isLoggedIn && !this.state.liked) {
+      axios.get(`${BACKEND_URL}/posts/${this.state.postId}/like/`, {
+        headers: {
+          'Authorization': `Token ${localStorage.getItem('token')}`
+        }
+      })
+        .then(res => {
+          if (res.status === 200 && res.data.liked) {
+            this.setState({
+              liked: res.data.liked
+            });
+          }
+        })
+        .catch(err => {
+          console.log("Failed to get like status: ", err);
+        });
+    }
   }
 
   render() {
@@ -137,11 +207,30 @@ class PostDetailPage extends React.Component {
       }} />
     } 
 
+    let now = moment();
+    let expiryTime = moment(this.state.post.date_expiry);
+    let duration = expiryTime.diff(now, 'seconds');
+
     return (
       <div>
         <Helmet>
           <title>Post Detail Page </title>
         </Helmet>
+
+        <Snackbar
+          open={this.state.snackBarStatus !== "inactive"}
+          autoHideDuration={5000}
+          onClose={() => this.setState({snackBarStatus: "inactive"})}
+        >
+          <Alert 
+            onClose={() => this.setState({snackBarStatus: "inactive"})} 
+            severity={this.snackBarMessages[this.state.snackBarStatus].severity}
+            sx={{ width: '100%' }}
+            variant="filled"
+          >
+            {this.snackBarMessages[this.state.snackBarStatus].message}
+          </Alert>
+        </Snackbar>
 
         <Stack
           component="form"
@@ -217,14 +306,30 @@ class PostDetailPage extends React.Component {
             <FormattedMessage {...messages.tags} />
           </H2>
 
+
           <Stack 
             direction={"row"} 
             spacing={2}
-          >
+            >
             {this.state.post.tags.split(",").map((tag) => (
               <Chip key={tag} color="primary" label={tag} />
-            ))}
+              ))}
           </Stack>
+
+          {this.state.post.video.length > 0 && (
+            <>
+              <H1>
+                <FormattedMessage {...messages.video} />
+              </H1>
+
+              <video
+                src={`${BACKEND_URL + this.state.post.video}`}
+                type="video/mp4" 
+                controls 
+              />
+            </>
+          )}
+          
           <H1>
             <FormattedMessage {...messages.detail} />
           </H1>
@@ -298,6 +403,12 @@ class PostDetailPage extends React.Component {
 
           </Stack>
           
+          <H2>
+            <FormattedMessage {...messages.lifespan} />
+          </H2>
+
+          <TimerComponent duration={duration} />
+
           <Stack 
             sx={{
               position: 'relative',
@@ -349,28 +460,34 @@ class PostDetailPage extends React.Component {
               value={this.state.post.comments.length}
             />
           </Stack>
-
-          <TextField 
+          
+          <TextField
+            disabled={!this.state.isLoggedIn}
             id="add_comment" 
             variant="outlined"
-            label="Add Comment"
+            label={this.state.isLoggedIn ? "Add Comment" : "You must login to add a comment"}
             placeholder="Add your comment here"
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                    <IconButton onClick={() => this.onCommentSend()}>
+                    <IconButton 
+                      onClick={() => this.onCommentSend()}
+                      disabled={!this.state.isLoggedIn}
+                    >
                       <SendIcon color="primary" />
                     </IconButton>
                 </InputAdornment>
               )
             }}
             value={this.state.comment}
-            onChange={(event) => this.setState({comment: event.target.value})}
+            onChange={(event) => this.setState({comment: event.target.value, commentError: ""})}
+            error={this.state.commentError.length > 0}
+            helperText={this.state.commentError}
           />
 
           {/* https://codesandbox.io/s/comment-box-with-material-ui-10p3c */}
-          {this.state.post.comments.map((comment) => (
-            <Paper style={{ padding: "30px 20px" }} elavation={6}>
+          {this.state.post.comments.map((comment, index) => (
+            <Paper key={"comment " + index} style={{ padding: "30px 20px" }} elavation={6}>
               <Grid container wrap="nowrap" spacing={2}>
                 <Grid item >
                   <FaceIcon 

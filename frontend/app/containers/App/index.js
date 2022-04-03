@@ -12,7 +12,6 @@ import styled from 'styled-components';
 import {Switch, Route, Redirect} from 'react-router-dom';
 
 import HomePage from 'containers/HomePage/Loadable';
-import FeaturePage from 'containers/FeaturePage/Loadable';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import CreatePostPage from 'containers/CreatePostPage/Loadable';
 import PostDetailPage from 'containers/PostDetailPage/Loadable';
@@ -38,12 +37,11 @@ export default function App() {
         titleTemplate="%s - Visage Tome"
         defaultTitle="Visage Tome"
       >
-        <meta name="description" content="A React.js Boilerplate application" />
+        <meta name="description" content="Winter 2022 ECE 493 Capstone Project" />
       </Helmet>
       <Header />
       <Switch>
         <Route exact path="/" component={HomePage} />
-        <Route path="/features" component={FeaturePage} />
         <Route path="/create" component={CreatePostPage} />
         <Route path="/post/:id" component={PostDetailPage} />
         <Route path="/admin">

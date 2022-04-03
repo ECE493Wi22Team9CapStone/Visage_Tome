@@ -11,6 +11,10 @@ export default defineMessages({
     id: `${scope}.images`,
     defaultMessage: 'Post Images',
   },
+  video: {
+    id: `${scope}.video`,
+    defaultMessage: 'Post Video',
+  },
   tags: {
     id: `${scope}.tags`,
     defaultMessage: 'Image Tags',
@@ -34,5 +38,17 @@ export default defineMessages({
   confirm: {
     id: `${scope}.confirm`,
     defaultMessage: 'Confirm',
+  },
+  lifespan: {
+    id: `${scope}.lifespan`,
+    defaultMessage: 'Lifespan',
+  },
+  guestLikeClick: {
+    id: `${scope}.guestLikeClick`,
+    defaultMessage: 'You must be logged in to like this post.',
+  },
+  commentPosted: {
+    id: `${scope}.commentPosted`,
+    defaultMessage: 'Your Comment has been posted.',
   }
 });
