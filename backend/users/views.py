@@ -28,6 +28,14 @@ class UserView(APIView):
 
     # FR2 - User.Login
     def post(self, request):
+        """
+        ## Description:
+        endpoint for user login
+        ## Responses:
+        **200**: successful request, user token is returned <br>
+        **400**: if the payload is missing te required fields <br>
+        **401**: if the user is banned by the admin <br>
+        """
         data = request.data
 
         expectedFields = ['username', 'password']
@@ -54,6 +62,13 @@ class UserView(APIView):
     # FR10 - Ban.User
     # only allowed to patch for banId
     def patch(self, request):
+        """
+        ## Description:
+        endpoint for administrator banning a user
+        ## Responses:
+        **200**: successful request <br>
+        **400**: if the user does not exist or request is invalid <br>
+        """
         bantime = timezone.now()
         if request.data.get('bantime', ''):
             bantime = dateutil.parser.isoparse(request.data['bantime'])
@@ -68,17 +83,23 @@ class UserView(APIView):
         except User.DoesNotExist:
             return Response("User doesn't exist", status=status.HTTP_400_BAD_REQUEST)
 
-        return Response("Invalid resrequest", status=status.HTTP_400_BAD_REQUEST)
+        return Response("Invalid request", status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserSignupView(APIView):
     serializer_class = UserSerializer
 
-    def get(self, request):
-        return Response("wrong", status=status.HTTP_200_OK)
-
     # FR1 - User.Registration
     def post(self, request):
+        """
+        ## Description:
+        endpoint for user registration
+        ## Responses:
+        **200**: successful request, user token is returned <br>
+        **400**: if the payload failed the serializer check <br>
+        **409**: if the username is already exist <br>
+        """
+
         data = request.data
 
         # validate fields

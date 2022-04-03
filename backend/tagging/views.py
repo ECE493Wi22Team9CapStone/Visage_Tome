@@ -14,6 +14,13 @@ tagger = AITagger()
 
 class TaggingView(APIView):
     def post(self, request):
+        """
+        ## Description:
+        return the list of tags for the image(s)
+        ## Responses:
+        **200**: successful request, tags are returned <br>
+        **400**: if the payload is missing the images field 
+        """
         if "images" not in request.data:
             return Response("Post does not include 'images' field", status=status.HTTP_400_BAD_REQUEST)
         # Save the images temporarily so we can tag them
