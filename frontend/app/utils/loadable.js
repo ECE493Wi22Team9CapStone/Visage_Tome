@@ -1,3 +1,7 @@
+/* 
+ * This file is required for the app to run properly
+ */
+
 import React, { lazy, Suspense } from 'react';
 
 const loadable = (importFunc, { fallback = null } = { fallback: null }) => {

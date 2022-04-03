@@ -1,5 +1,7 @@
 /**
  * Combine all reducers in this file and export the combined reducers.
+ * 
+ * This file is required for the app to run properly
  */
 
 import { combineReducers } from 'redux';

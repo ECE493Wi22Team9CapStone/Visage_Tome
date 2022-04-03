@@ -1,3 +1,7 @@
+/* 
+ * A loading indicator displayed when the app is still fetch data.
+ * This file is required for the app to run properly
+ */
 import React from 'react';
 
 import Circle from './Circle';

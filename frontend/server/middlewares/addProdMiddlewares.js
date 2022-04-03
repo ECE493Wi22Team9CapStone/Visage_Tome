@@ -1,3 +1,7 @@
+/* 
+ * This file is required for the app to run properly
+ */
+
 const path = require('path');
 const express = require('express');
 const compression = require('compression');

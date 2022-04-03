@@ -1,4 +1,7 @@
 /* eslint-disable no-console */
+/* 
+ * This file is required for the app to run properly
+ */
 
 const chalk = require('chalk');
 const ip = require('ip');

@@ -1,4 +1,7 @@
 /* eslint-disable global-require */
+/* 
+ * This file is required for the app to run properly
+ */
 
 /**
  * Front-end middleware

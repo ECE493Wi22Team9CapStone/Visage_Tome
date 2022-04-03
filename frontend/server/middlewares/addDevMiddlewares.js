@@ -1,3 +1,7 @@
+/* 
+ * This file is required for the app to run properly
+ */
+
 const path = require('path');
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');

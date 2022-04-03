@@ -3,9 +3,7 @@
  *
  * This will setup the i18n language files and locale data for your app.
  *
- *   IMPORTANT: This file is used by the internal build
- *   script `extract-intl`, and must use CommonJS module syntax
- *   You CANNOT use import/export in this file.
+ * This file is required for the app to run properly
  */
 const addLocaleData = require('react-intl').addLocaleData; //eslint-disable-line
 const enLocaleData = require('react-intl/locale-data/en');
