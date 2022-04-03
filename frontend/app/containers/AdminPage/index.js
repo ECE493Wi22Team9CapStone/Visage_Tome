@@ -1,7 +1,12 @@
 /*
  * AdminPage
  *
+ * This component let admin to configure parameters
+ * Related Function Requirements:
+ *  FR7 - Change.LifeSpan
+ *  FR10 - Ban.User
  */
+
 
 import React, {useEffect, useState} from 'react';
 import Box from "@mui/material/Box";
