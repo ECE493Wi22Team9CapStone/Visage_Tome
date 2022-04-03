@@ -1,3 +1,14 @@
+/**
+ * PostDetailPage
+ *
+ * This component let user view the details of a post
+ * Related Function Requirements:
+ *  FR5 - Delete.Post
+ *  FR6 - Post.LifeSpan
+ *  FR11 - Like.Posts
+ *  FR12 - Comment.Posts
+ */
+
 // react module components
 import React from 'react';
 import { Helmet } from 'react-helmet';

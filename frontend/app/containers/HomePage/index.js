@@ -1,7 +1,10 @@
-/*
+/**
  * HomePage
  *
- * This is the first thing users see of our App, at the '/' route
+ * This component let user create a new post
+ * Related Function Requirements:
+ *  FR8 - View.Posts
+ *  FR9 - Search.Post
  */
 
 import React from 'react';
