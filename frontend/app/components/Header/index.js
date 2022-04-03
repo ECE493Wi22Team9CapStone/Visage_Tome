@@ -28,6 +28,7 @@ import messages from "./messages";
 import {BACKEND_URL} from "../../utils/constants";
 import NavBar from './NavBar';
 import Item from "../ListItem/Item";
+import {Link} from "react-router-dom";
 
 function Header() {
   const customStyles = {
@@ -48,6 +49,9 @@ function Header() {
     },
     authButtons: {
       width: "100%",
+      height: "90%",
+    },
+    adminPanelButton: {
       height: "90%",
     },
     modalContainer: {
@@ -124,10 +128,19 @@ function Header() {
     return (
       <Grid container spacing={1}>
         <Grid item xs={6}>
-          <Typography variant="body1">{loggedInUsername}</Typography>
+          <Item>
+            <Typography variant="body1">{loggedInUsername}</Typography>
+            {(localStorage.getItem('admin') === 'true') &&
+              <Link to="/admin">
+                <Button style={customStyles.adminPanelButton} variant="outlined">Admin</Button>
+              </Link>
+            }
+          </Item>
         </Grid>
         <Grid item xs={6}>
+          <Item>
           <Button startIcon={<LogoutIcon/>} style={customStyles.authButtons} variant="outlined" onClick={logout}>Logout</Button>
+          </Item>
         </Grid>
       </Grid>
     )
