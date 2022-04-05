@@ -10,7 +10,7 @@ The Frontend used the [react-boilerplate](https://github.com/react-boilerplate/r
 ### Troubleshooting
 1. If any issues occured during step 2 or 3 above, try upgrading node to the newest version
 3. Use a modern browser like Chrome or Edge to access the application
-2. Sometimes the application may take a while to load when you first open it, just give some time for it to load and it should be smooth afterwards
+2. Sometimes the application may take a while to load (max 1-2 minutes) when you first open it, just give some time for it to load and it should be smooth afterwards
 
 ## License
 The react-boilerplate is licensed under the MIT license, Copyright (c) 2019 Maximilian
