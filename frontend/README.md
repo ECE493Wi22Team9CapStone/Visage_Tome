@@ -2,7 +2,7 @@
 The Frontend used the [react-boilerplate](https://github.com/react-boilerplate/react-boilerplate) as a template to start our project
 
 ## Deployment
-1. install [node](https://nodejs.org/en/), newest LTS version is preferred
+1. install [node](https://nodejs.org/en/), latest LTS version is preferred
 2. install all the node modules by running `npm install`
 3. start the react app by running `npm start`
 4. the app will be hosted at [http://localhost:3000](http://localhost:3000)

@@ -17,6 +17,7 @@ replace `<generated_key>` with a key generated [at this link](https://djecrety.i
 ### Troubleshooting
 1. Make sure your python version is >= 3.6
 2. If any steps complain about the secret key, try regenerating a secert key, as your specific secret key might contain forbidden character(s).
+3. Depending on how python and pip is installed on your machine, sometimes you have to use `python` and `pip` instead of `python3` and `pip3`
 
 ## Documentation
 The API Documentation exist on the Swagger UI at [http://localhost:8000](http://localhost:8000), you can click on the individual endpoints to view its description.
@@ -28,8 +29,8 @@ A separate submission **pretrain_open_images_final.zip** is included in the Fina
 After downloading the .zip file, extract the 3 files, and place all 3 files inside the `backend/tagging/pretrain_open_images/` folder
 
 ## Admin User
-Currently there is no option to create an admin user on the frontend application
-To create a admin, you can run the following utlity command provided by Django:
+Currently there is no option to create an admin user on the frontend application.
+To create a admin, you can run the following utlity command provided by Django and follow the prompts to create an admin user:
 `python3 manage.py createsuperuser`
 
 After the admin user is created, you can use this user to login to the frontend application and access the [django admin panel](http://localhost:8000/admin)
