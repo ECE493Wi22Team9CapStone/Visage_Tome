@@ -69,6 +69,8 @@ class UserView(APIView):
         **200**: successful request <br>
         **400**: if the user does not exist or request is invalid <br>
         """
+
+        # bantime expects times for ban in ISO strings
         bantime = timezone.now()
         if request.data.get('bantime', ''):
             bantime = dateutil.parser.isoparse(request.data['bantime'])
